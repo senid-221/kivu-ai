@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function Home(){return <main className="landing"><nav><b>✦ KIVU AI</b><div><Link href="/app">Get started</Link></div></nav><section><span>✦ Intelligence for Everyone</span><h1>Learn. Build.<br/><em>Grow.</em></h1><p>KIVU AI brings specialized intelligence for students, teachers, developers, sellers and NESA exam revision.</p><Link className="button" href="/app">Start with KIVU AI →</Link></section></main>}
