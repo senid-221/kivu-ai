@@ -1,0 +1,2 @@
+export const KIVU_MODELS={teacher:{name:"Teacher",icon:"👨‍🏫",description:"Teaching and clear explanations"},developer:{name:"Developer",icon:"💻",description:"Websites, apps, systems and UI"},student:{name:"Student",icon:"🎓",description:"Study and interactive revision"},seller:{name:"Seller",icon:"💼",description:"Business, sales and growth"},nesa_exam_rev:{name:"NESA EXAM Rev",icon:"📝",description:"Question-by-question examination review"}} as const;
+export type KivuModelId=keyof typeof KIVU_MODELS;
