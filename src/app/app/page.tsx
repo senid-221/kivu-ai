@@ -1,0 +1,3 @@
+import Link from "next/link";
+const models=[["👨‍🏫","Teacher","teacher","Teaching and explanations"],["💻","Developer","developer","Websites, apps, systems and UI"],["🎓","Student","student","Revision and interactive learning"],["💼","Seller","seller","Business and sales expertise"],["📝","NESA EXAM Rev","nesa_exam_rev","Review exams one question at a time"]];
+export default function App(){return <main className="app"><header><b>✦ KIVU AI</b><span>Intelligence for Everyone</span></header><h1>How can I help today? 👋</h1><p>Choose a specialized AI model to begin.</p><div className="grid">{models.map(([icon,name,id,desc])=><Link href={"/app/chat?model="+id} className="card" key={id}><b className="icon">{icon}</b><h2>{name}</h2><p>{desc}</p><i>→</i></Link>)}</div></main>}
