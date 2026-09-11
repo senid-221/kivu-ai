@@ -1,6 +1,6 @@
 generator client { provider = "prisma-client-js" }
 datasource db { provider = "postgresql" url = env("DATABASE_URL") }
-model User { id String @id @default(cuid()) name String? email String @unique passwordHash String createdAt DateTime @default(now()) conversations Conversation[] examReviews ExamReview[] materials Material[] studySessions StudySession[] achievements UserAchievement[] }
+model User { id String @id @default(cuid()) name String? email String @unique passwordHash String createdAt DateTime @default(now()) conversations Conversation[] examReviews ExamReview[] materials Material[] studySessions StudySession[] achievements UserAchievement[] reminders StudyReminder[] }
 model Conversation { id String @id @default(cuid()) title String model String userId String user User @relation(fields:[userId],references:[id],onDelete:Cascade) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt messages Message[] }
 model Message { id String @id @default(cuid()) role String content String conversationId String conversation Conversation @relation(fields:[conversationId],references:[id],onDelete:Cascade) createdAt DateTime @default(now()) }
 model ExamReview { id String @id @default(cuid()) subject String? question String options String? correctAnswer String? explanation String? keyConcept String? revisionTip String? userId String user User @relation(fields:[userId],references:[id],onDelete:Cascade) createdAt DateTime @default(now()) }
@@ -8,3 +8,4 @@ model Material { id String @id @default(cuid()) name String type String size Int
 model StudySession { id String @id @default(cuid()) type String score Int? total Int? completedAt DateTime @default(now()) userId String user User @relation(fields:[userId],references:[id],onDelete:Cascade) materialId String? material Material? @relation(fields:[materialId],references:[id],onDelete:Cascade) }
 model Achievement { id String @id code String @unique title String description String icon String users UserAchievement[] }
 model UserAchievement { id String @id @default(cuid()) userId String user User @relation(fields:[userId],references:[id],onDelete:Cascade) achievementId String achievement Achievement @relation(fields:[achievementId],references:[id],onDelete:Cascade) earnedAt DateTime @default(now()) @@unique([userId,achievementId]) }
+model StudyReminder { id String @id @default(cuid()) title String time String days String enabled Boolean @default(true) createdAt DateTime @default(now()) userId String user User @relation(fields:[userId],references:[id],onDelete:Cascade) }
