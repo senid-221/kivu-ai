@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
     "@aws-sdk/client-s3": "^3.750.0",
     "@aws-sdk/s3-request-presigner": "^3.750.0",
     "@prisma/client": "^6.8.2",
-    "@anthropic-ai/sdk": "^0.39.0",
     "bcryptjs": "^3.0.2",
     "jose": "^6.0.10",
     "lucide-react": "^0.468.0",
