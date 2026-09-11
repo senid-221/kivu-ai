@@ -1,10 +1,1 @@
-import { NextResponse } from "next/server";
-
-export async function GET() {
-  return NextResponse.json({
-    ok: true,
-    service: "kivu-ai",
-    aiProvider: "anthropic",
-    timestamp: new Date().toISOString(),
-  });
-}
+import {NextResponse} from "next/server";export const dynamic="force-dynamic";export async function GET(){return NextResponse.json({status:"ok",service:"KIVU AI"})}
