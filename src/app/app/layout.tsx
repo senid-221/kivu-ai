@@ -1,30 +1,37 @@
 import Link from "next/link";
+import { Bot, History, LayoutDashboard, MessageSquarePlus, Upload, UserRound, BarChart3 } from "lucide-react";
 
 export default function AppLayout({children}:{children:React.ReactNode}){
  const nav=[
-  ["⌂","Home","/app"],
-  ["💬","Chat","/app/chat"],
-  ["📈","Progress","/app/progress"],
-  ["📚","Materials","/app/upload"],
-  ["◉","Profile","/app/profile"]
+  {icon:<MessageSquarePlus size={18}/>,label:"New chat",href:"/app/chat"},
+  {icon:<History size={18}/>,label:"History",href:"/app/history"},
+  {icon:<BarChart3 size={18}/>,label:"Progress",href:"/app/progress"},
+  {icon:<Upload size={18}/>,label:"Materials",href:"/app/upload"},
  ];
- const mobileNav=[
-  ["⌂","Home","/app"],
-  ["💬","Chat","/app/chat"],
-  ["📚","Materials","/app/upload"],
-  ["◉","Profile","/app/profile"]
- ];
- return <div className="kivuApp">
-   <aside className="appSidebar">
-    <Link className="appBrand" href="/app">✦ <span>KIVU AI</span></Link>
+ return <div className="kivuApp agentShell">
+   <aside className="appSidebar agentSidebar">
+    <Link className="appBrand agentSideBrand" href="/app"><span className="brandCube"><Bot size={18}/></span><span>KIVU AI</span></Link>
+    <Link className="agentNewChat" href="/app/chat"><MessageSquarePlus size={17}/> New chat</Link>
     <div className="navLabel">WORKSPACE</div>
-    <nav>{nav.map(x=><Link href={x[2]} key={x[1]}><span>{x[0]}</span>{x[1]}</Link>)}</nav>
+    <nav>{nav.slice(1).map(x=><Link href={x.href} key={x.label}><span>{x.icon}</span>{x.label}</Link>)}</nav>
+    <div className="agentSideSpacer" />
+    <div className="navLabel">ACCOUNT</div>
+    <nav className="agentAccountNav">
+      <Link href="/app"><span><LayoutDashboard size={18}/></span>Dashboard</Link>
+      <Link href="/app/profile"><span><UserRound size={18}/></span>Profile</Link>
+    </nav>
+    <div className="agentSidebarFooter"><span className="agentStatusDot"/> AI systems ready</div>
    </aside>
    <header className="mobileAppHeader">
-    <Link href="/app">✦ KIVU AI</Link>
-    <Link href="/app/chat" aria-label="Open Chat">💬 Chat</Link>
+    <Link href="/app/chat" className="mobileAgentBrand"><span className="brandCube"><Bot size={16}/></span> KIVU AI</Link>
+    <Link href="/app/history" aria-label="Conversation history"><History size={20}/></Link>
    </header>
    <div className="appContent">{children}</div>
-   <nav className="bottomNav">{mobileNav.map(x=><Link href={x[2]} key={x[1]}><span>{x[0]}</span><small>{x[1]}</small></Link>)}</nav>
+   <nav className="bottomNav">
+    <Link href="/app/chat"><MessageSquarePlus size={19}/><small>Chat</small></Link>
+    <Link href="/app/history"><History size={19}/><small>History</small></Link>
+    <Link href="/app/upload"><Upload size={19}/><small>Files</small></Link>
+    <Link href="/app/profile"><UserRound size={19}/><small>Profile</small></Link>
+   </nav>
  </div>
 }
