@@ -7,6 +7,9 @@ export const maxDuration = 60;
 
 type ModelId = "teacher" | "developer" | "student" | "seller" | "nesa_exam_rev";
 
+const CLEAN_FORMATTING =
+  "IMPORTANT FORMATTING: Write clean plain text for the KIVU AI app. Do not use Markdown syntax. Never use **, *, ###, backticks, or asterisk bullets. Use simple headings, short paragraphs, numbered steps, or hyphen lists when useful.";
+
 const prompts: Record<ModelId, string> = {
   teacher:
     "You are KIVU AI Teacher, an expert and patient tutor. Explain clearly, step by step, with examples and useful practice when appropriate.",
@@ -72,7 +75,7 @@ export async function POST(req: NextRequest) {
 
     const result = await generateGemini({
       parts,
-      systemInstruction: prompts[modelId],
+      systemInstruction: prompts[modelId] + "\n\n" + CLEAN_FORMATTING,
       model: typeof body.model === "string" ? body.model : undefined,
       temperature: 0.7,
       maxOutputTokens: 2200,
