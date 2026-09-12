@@ -1,2 +1,41 @@
-import { NextRequest, NextResponse } from "next/server"; import { readSession } from "../../../lib/auth";
-async function ask(prompt:string){const k=process.env.GEMINI_API_KEY;if(!k)throw Error("Gemini API key missing");const m=process.env.GEMINI_MODEL||"gemini-2.5-flash";const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(m)+":generateContent?key="+encodeURIComponent(k),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});const d:any=await r.json();if(!r.ok)throw Error(d?.error?.message||"Gemini error");return d?.candidates?.[0]?.content?.parts?.map((p:any)=>p.text||"").join("\n")||""} export async function POST(req:NextRequest){try{const t=req.cookies.get("kivu_session")?.value;if(!t)throw Error("Unauthorized");await readSession(t);const {task,projectType,stack}=await req.json();if(!task?.trim())return NextResponse.json({error:"Describe what you want to build."},{status:400});const answer=await ask("You are KIVU AI Developer, a senior full-stack engineer. Give practical architecture, implementation plan and clean code when useful. Project type: "+(projectType||"Web application")+". Stack: "+(stack||"Choose best")+". Request: "+task);return NextResponse.json({answer})}catch(e){return NextResponse.json({error:e instanceof Error?e.message:"Unable to process this development request."},{status:500})}}
+import { NextRequest, NextResponse } from "next/server";
+import { readSession } from "@/lib/auth";
+import { generateGemini } from "@/lib/gemini";
+
+export async function POST(req: NextRequest) {
+  try {
+    const token = req.cookies.get("kivu_session")?.value;
+    if (!token) throw new Error("Unauthorized");
+    await readSession(token);
+
+    const { task, projectType, stack } = await req.json();
+    if (!task?.trim()) {
+      return NextResponse.json({ error: "Describe what you want to build." }, { status: 400 });
+    }
+
+    const result = await generateGemini({
+      systemInstruction:
+        "You are KIVU AI Developer, a senior full-stack engineer. Give practical architecture, implementation plans and clean production-quality code when useful.",
+      parts: [
+        {
+          text:
+            "Project type: " +
+            (projectType || "Web application") +
+            "\nStack: " +
+            (stack || "Choose the best stack") +
+            "\nRequest: " +
+            task,
+        },
+      ],
+    });
+
+    return NextResponse.json({ answer: result.text, model: result.model });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unable to process this development request.";
+    return NextResponse.json(
+      { error: message },
+      { status: message === "Unauthorized" ? 401 : 500 }
+    );
+  }
+}
