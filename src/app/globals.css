@@ -138,3 +138,21 @@ form{max-width:860px}.shell form>div,.shell form>label{display:grid;gap:8px;marg
 
 /* EDUKA brand mark uses a real vector icon from the Lucide set, available through Supericons. */
 .landingBrand,.landingEyebrow{display:inline-flex;align-items:center;gap:8px}.landingBrand svg,.landingEyebrow svg{flex:0 0 auto}
+
+
+/* EDUKA language and typography refinement: clear Kinyarwanda, simple English */
+:root{--eduka-title-size:clamp(24px,3vw,34px);--eduka-subtitle-size:15px}
+h1,h2,h3{font-weight:750;line-height:1.2;letter-spacing:-.02em}
+.agentWelcome h1,.welcome h1,.studentIntro h1,.dashboardTop h1{font-size:var(--eduka-title-size)!important;line-height:1.22!important;letter-spacing:-.025em!important}
+.agentWelcome p,.welcome p,.studentIntro p,.dashboardTop p,.studentHelp{font-size:var(--eduka-subtitle-size)!important;line-height:1.6!important;max-width:680px}
+.agentHeader small,.agentHeader .agentBrand small{line-height:1.45;white-space:normal}
+.agentEyebrow,.studentEyebrow,.welcome>span{font-size:11px!important;line-height:1.5!important;letter-spacing:1px!important}
+.studyBox h2,.teacherAnswer h2,.developerAnswer h2,.sellerAnswer h2{font-size:22px!important;line-height:1.3!important;margin:0 0 10px}
+.agentMessage,.messageBubble,.chatMessage{line-height:1.7!important;word-break:normal;overflow-wrap:anywhere}
+@media(max-width:540px){
+ :root{--eduka-title-size:28px;--eduka-subtitle-size:14px}
+ .agentWelcome h1,.welcome h1,.studentIntro h1,.dashboardTop h1{font-size:28px!important;line-height:1.25!important}
+ .agentWelcome p,.welcome p,.studentIntro p,.dashboardTop p,.studentHelp{font-size:14px!important;line-height:1.65!important}
+ .agentHeader small{font-size:11px!important;max-width:220px}
+ .studyBox h2,.teacherAnswer h2,.developerAnswer h2,.sellerAnswer h2{font-size:19px!important}
+}
