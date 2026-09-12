@@ -40,7 +40,7 @@ function normalizeModel(name: string) {
   return name.replace(/^models\//, "").trim();
 }
 
-async function listAvailableModels(apiKey: string, force = false) {
+async function listAvailableModels(apiKey: string, force = false): Promise<string[]> {
   if (!force && cachedModels && Date.now() < cacheUntil) return cachedModels;
 
   const response = await fetch(
@@ -73,7 +73,7 @@ async function listAvailableModels(apiKey: string, force = false) {
 }
 
 async function selectModel(apiKey: string, requested?: string, force = false) {
-  const available = await listAvailableModels(apiKey, force);
+  const available: string[] = (await listAvailableModels(apiKey, force)) ?? [];
   const configured = normalizeModel(
     requested || process.env.GEMINI_MODEL || ""
   );
