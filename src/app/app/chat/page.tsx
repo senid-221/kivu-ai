@@ -140,11 +140,13 @@ function ChatContent() {
         <div className="agentWelcomeBadge"><GraduationCap size={24} /></div>
         <p className="agentEyebrow">EDUKA AGENT</p>
         <h1>{model.greeting}</h1>
-        <p>Baza ikibazo cyangwa shyiraho PDF, inyandiko, ikizamini cyangwa ifoto. EDUKA irayisesengura ikagufasha kuyisobanukirwa.</p>
+        <p>{modelId === "developer"
+          ? "Sobanura website, application cyangwa system ushaka kubaka. EDUKA iragufasha gutegura, kwandika no gukosora code."
+          : "Baza ikibazo cyangwa shyiraho PDF, inyandiko, ikizamini cyangwa ifoto. EDUKA irayisesengura ikagufasha kuyisobanukirwa."}</p>
         <div className="agentPromptGrid">
-          <button onClick={() => setInput("Sobanura iki gice intambwe ku yindi")}>Sobanura isomo</button>
-          <button onClick={() => setInput(modelId === "nesa_exam_rev" ? "Nkorera imyitozo ya NESA ishingiye ku bibazo byabanje, ijyanye n'urwego n'isomo ryanjye" : "Mpa urugero hanyuma ungerageze kureba niba nasobanukiwe")}>{modelId === "nesa_exam_rev" ? "Imyitozo ya NESA" : "Imenyereze"}</button>
-          <button onClick={() => fileInput.current?.click()}><Paperclip size={15} /> Soma inyandiko</button>
+          <button onClick={() => setInput(modelId === "developer" ? "Mfasha kubaka website igezweho" : "Sobanura iki gice intambwe ku yindi")}>{modelId === "developer" ? "Kubaka website" : "Sobanura isomo"}</button>
+          <button onClick={() => setInput(modelId === "nesa_exam_rev" ? "Nkorera imyitozo ya NESA ishingiye ku bibazo byabanje, ijyanye n'urwego n'isomo ryanjye" : modelId === "developer" ? "Mfasha gukosora code yanjye" : "Mpa urugero hanyuma ungerageze kureba niba nasobanukiwe")}>{modelId === "nesa_exam_rev" ? "Imyitozo ya NESA" : modelId === "developer" ? "Gukosora code" : "Imenyereze"}</button>
+          <button onClick={() => fileInput.current?.click()}><Paperclip size={15} /> {modelId === "developer" ? "Soma code cyangwa inyandiko" : "Soma inyandiko"}</button>
         </div>
       </div> : messages.map((m, i) => <div className={"agentMessage " + m.role} key={i}>
         {m.role === "assistant" && <div className="messageAvatar"><GraduationCap size={15} /></div>}
