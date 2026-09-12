@@ -11,7 +11,9 @@ export type KnowledgeSource = {
 
 type AcademicSubject =
   | "physics" | "chemistry" | "biology" | "mathematics"
-  | "computer_science" | "english" | "history" | "geography" | "general";
+  | "computer_science" | "english" | "history" | "geography"
+  | "agriculture" | "economics" | "entrepreneurship" | "literature"
+  | "kinyarwanda" | "french" | "religion" | "art" | "general";
 
 const SUBJECT_TERMS: Record<Exclude<AcademicSubject, "general">, string[]> = {
   physics: ["physics", "force", "motion", "energy", "electric", "electricity", "wave", "pressure", "velocity", "acceleration", "momentum", "formula"],
@@ -21,7 +23,15 @@ const SUBJECT_TERMS: Record<Exclude<AcademicSubject, "general">, string[]> = {
   computer_science: ["computer science", "programming", "algorithm", "software", "coding", "javascript", "python"],
   english: ["english", "grammar", "literature", "writing", "language"],
   history: ["history", "historical", "colonial", "kingdom", "war", "independence"],
-  geography: ["geography", "climate", "map", "population", "environment", "landform"]
+  geography: ["geography", "climate", "map", "population", "environment", "landform"],
+  agriculture: ["agriculture", "farming", "crop", "livestock", "soil", "fertilizer"],
+  economics: ["economics", "economy", "market", "demand", "supply", "inflation"],
+  entrepreneurship: ["entrepreneurship", "business plan", "enterprise", "startup", "innovation"],
+  literature: ["literature", "novel", "poetry", "poem", "drama", "author"],
+  kinyarwanda: ["kinyarwanda", "ikinyarwanda", "umwandiko", "ubuvanganzo"],
+  french: ["french", "français", "francais", "grammaire française"],
+  religion: ["religion", "religious", "ethics", "christian", "islam"],
+  art: ["art", "creative arts", "drawing", "music", "dance", "design"]
 };
 
 function detectSubject(query: string): AcademicSubject {
@@ -122,6 +132,34 @@ function buildCurriculumQuery(query: string, subject: AcademicSubject, level: Rw
     level === "advanced_level" ? "Rwanda advanced level curriculum" : "Rwanda curriculum";
   const subjectLabel = subject === "general" ? "" : subject.replace("_", " ");
   return [levelLabel, subjectLabel, query].filter(Boolean).join(" ");
+}
+
+
+export type ALevelCombination = "PCB" | "MCB" | "MPC" | "PCM" | "MCE" | "MEG" | "HEG" | "HEL" | "HGL" | "LKK" | "general";
+
+const A_LEVEL_COMBINATIONS: Record<Exclude<ALevelCombination, "general">, string[]> = {
+  PCB: ["physics", "chemistry", "biology"],
+  MCB: ["mathematics", "chemistry", "biology"],
+  MPC: ["mathematics", "physics", "computer science"],
+  PCM: ["physics", "chemistry", "mathematics"],
+  MCE: ["mathematics", "computer science", "economics"],
+  MEG: ["mathematics", "economics", "geography"],
+  HEG: ["history", "economics", "geography"],
+  HEL: ["history", "economics", "literature"],
+  HGL: ["history", "geography", "literature"],
+  LKK: ["literature", "kinyarwanda", "language"]
+};
+
+export function detectALevelCombination(query: string): ALevelCombination {
+  const upper = query.toUpperCase();
+  for (const combo of Object.keys(A_LEVEL_COMBINATIONS) as Exclude<ALevelCombination, "general">[]) {
+    if (new RegExp("\\\\b" + combo + "\\\\b").test(upper)) return combo;
+  }
+  return "general";
+}
+
+function combinationSubjects(combo: ALevelCombination) {
+  return combo === "general" ? [] : A_LEVEL_COMBINATIONS[combo];
 }
 
 const SUBJECT_SOURCE_MAP: Record<AcademicSubject, Partial<Record<KnowledgeMode, string[]>>> = {
@@ -383,8 +421,10 @@ async function retrieveSourceContent(source: KnowledgeSource, query: string) {
 export async function retrieveKnowledge(mode: KnowledgeMode, query: string): Promise<KnowledgeSource[]> {
   const subject = detectSubject(query);
   const level = detectRwandaEducationLevel(query);
+  const combination = level === "advanced_level" ? detectALevelCombination(query) : "general";
   const providers = providersForSubject(mode, subject);
-  const subjectQuery = buildCurriculumQuery(query, subject, level);
+  const comboContext = combination === "general" ? "" : " " + combination + " " + combinationSubjects(combination).join(" ");
+  const subjectQuery = buildCurriculumQuery(query + comboContext, subject, level);
   const groups = await Promise.all(providers.map(provider => searchProvider(provider, subjectQuery)));
   // Keep a wider candidate pool before enrichment so subject-specific evidence can win.
   const sources = groups.flat().slice(0, 12);
