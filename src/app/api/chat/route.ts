@@ -28,47 +28,31 @@ function getText(response: Anthropic.Messages.Message) {
 export async function POST(req: NextRequest) {
   try {
     await requireUser(req);
-
-    const body: { modelId?: string; message?: string } = await req.json();
+    const body: { modelId?: string; message?: string; images?: { mediaType: string; data: string }[] } = await req.json();
     const message = typeof body.message === "string" ? body.message.trim() : "";
-    const modelId: ModelId =
-      body.modelId === "teacher" ||
-      body.modelId === "developer" ||
-      body.modelId === "student" ||
-      body.modelId === "seller" ||
-      body.modelId === "nesa_exam_rev"
-        ? body.modelId
-        : "teacher";
+    const modelId: ModelId = body.modelId === "developer" || body.modelId === "student" || body.modelId === "seller" || body.modelId === "nesa_exam_rev" ? body.modelId : "teacher";
 
-    if (!message) {
-      return NextResponse.json({ error: "Message is required." }, { status: 400 });
+    if (!message && !(body.images?.length)) return NextResponse.json({ error: "Message or image is required." }, { status: 400 });
+
+    const content: Anthropic.Messages.ContentBlockParam[] = [];
+    for (const image of body.images || []) {
+      if (typeof image.data === "string" && image.data.length && /^image\/(jpeg|png|gif|webp)$/.test(image.mediaType)) {
+        content.push({ type: "image", source: { type: "base64", media_type: image.mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp", data: image.data } });
+      }
     }
+    if (message) content.push({ type: "text", text: message });
 
-    const client = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    });
-
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const response = await client.messages.create({
       model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514",
       max_tokens: 2200,
       system: prompts[modelId],
-      messages: [{ role: "user", content: message }],
+      messages: [{ role: "user", content }]
     });
 
-    const reply = getText(response);
-
-    return NextResponse.json({
-      reply: reply || "I could not generate a response. Please try again.",
-      modelId,
-    });
+    return NextResponse.json({ reply: getText(response) || "I could not generate a response. Please try again.", modelId });
   } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    return NextResponse.json(
-      { error: "Unable to complete this request right now." },
-      { status: 500 },
-    );
+    if (error instanceof Error && error.message === "Unauthorized") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unable to complete this request right now." }, { status: 500 });
   }
 }
