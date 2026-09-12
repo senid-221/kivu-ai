@@ -9,66 +9,82 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (loading) return;
     setError("");
-
-    const response = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      setError(data.error || "Unable to create your account.");
-      return;
+    setLoading(true);
+    try {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || "Unable to create your account.");
+        return;
+      }
+      router.push("/app");
+      router.refresh();
+    } catch {
+      setError("Unable to connect right now. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    router.push("/app");
   }
 
   return (
-    <main className="authPage">
-      <form onSubmit={submit} className="authCard">
-        <Link href="/" className="brand">✦ KIVU AI</Link>
-        <h1>Create your account</h1>
-        <p>Start learning, building and growing with KIVU.</p>
+    <main className="kivuAuth">
+      <section className="kivuAuthVisual">
+        <Link href="/" className="kivuLogo"><span>✦</span> KIVU AI</Link>
+        <div className="kivuVisualCopy">
+          <span className="kivuEyebrow">INTELLIGENCE FOR EVERYONE</span>
+          <h2>Build your future with <em>AI.</em></h2>
+          <p>Learn, create, revise and grow with intelligent tools designed around you.</p>
+          <div className="kivuFeatureList">
+            <div><b>✦</b><span><strong>Learn faster</strong><small>Study with your personal AI teacher</small></span></div>
+            <div><b>◈</b><span><strong>Create smarter</strong><small>Build websites, apps and systems</small></span></div>
+            <div><b>✓</b><span><strong>Achieve more</strong><small>Track progress and improve every day</small></span></div>
+          </div>
+        </div>
+        <p className="kivuCopyright">© 2026 KIVU AI</p>
+      </section>
 
-        <input
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder="Your name"
-        />
+      <section className="kivuAuthPanel">
+        <div className="kivuAuthInner">
+          <div className="kivuMobileLogo">✦ KIVU AI</div>
+          <span className="kivuEyebrow">CREATE YOUR ACCOUNT</span>
+          <h1>Welcome to KIVU AI</h1>
+          <p className="kivuLead">Create your account and start exploring what you can do.</p>
 
-        <input
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="Email address"
-          required
-        />
+          <form onSubmit={submit} className="kivuForm">
+            <label>
+              <span>Full name</span>
+              <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Enter your name" autoComplete="name" />
+            </label>
+            <label>
+              <span>Email address</span>
+              <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" autoComplete="email" required />
+            </label>
+            <label>
+              <span>Password</span>
+              <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters" autoComplete="new-password" minLength={8} required />
+            </label>
 
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="Password"
-          minLength={8}
-          required
-        />
+            {error && <div className="kivuFormError">{error}</div>}
 
-        {error && <small className="formError">{error}</small>}
+            <button className="kivuPrimaryButton" type="submit" disabled={loading}>
+              {loading ? "Creating your account..." : "Create account"} <span>→</span>
+            </button>
+          </form>
 
-        <button className="button" type="submit">Create account</button>
-
-        <p>
-          Already have an account? <Link href="/login">Sign in</Link>
-        </p>
-      </form>
+          <p className="kivuSwitch">Already have an account? <Link href="/login">Sign in</Link></p>
+        </div>
+      </section>
     </main>
   );
 }
