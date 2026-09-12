@@ -210,7 +210,39 @@ export async function uploadGeminiFile(
     );
   }
 
-  const file = data.file;
+  let file = data.file;
+
+  // Some uploads (especially larger documents) need a short processing phase
+  // before they can be passed to generateContent.
+  if (typeof file?.name === "string") {
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const state = String(file?.state || "ACTIVE").toUpperCase();
+      if (state === "ACTIVE" || !file?.state) break;
+      if (state === "FAILED") {
+        throw new Error("Gemini could not process this uploaded document.");
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const status = await fetch(
+        API_BASE + "/" + encodeURIComponent(file.name) + "?key=" + encodeURIComponent(apiKey),
+        { cache: "no-store" }
+      );
+      const statusData = await status.json().catch(() => ({}));
+      if (!status.ok) {
+        throw new Error(
+          typeof statusData?.error?.message === "string"
+            ? statusData.error.message
+            : "Unable to check the uploaded document."
+        );
+      }
+      file = statusData.file || statusData;
+    }
+
+    if (String(file?.state || "ACTIVE").toUpperCase() === "PROCESSING") {
+      throw new Error("The uploaded document is taking too long to prepare. Please try again.");
+    }
+  }
+
   return {
     uri: String(file.uri),
     mimeType: String(file.mimeType || mimeType),
