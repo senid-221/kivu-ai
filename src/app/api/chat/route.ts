@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
     if (message) parts.push({ text: message });
 
     // You can override this in Hostinger with GEMINI_MODEL.
-    const model = process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash";
+    const model = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
 
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/" +
