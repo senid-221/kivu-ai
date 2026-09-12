@@ -46,3 +46,36 @@ form{max-width:860px}.shell form>div,.shell form>label{display:grid;gap:8px;marg
 @media(max-width:520px){
  .dashboardTop h1{font-size:27px}.dashboardTop p{font-size:13px}.hero{padding:24px 18px}.hero h2{font-size:37px}.heroActions{display:grid;grid-template-columns:1fr}.heroActions a{text-align:center}.modelGrid{grid-template-columns:1fr}.modelCard{display:grid;grid-template-columns:50px 1fr;column-gap:13px;align-items:center}.modelCard h3{margin:0}.modelCard p{grid-column:2;margin:4px 0}.modelCard b{grid-column:2}.chatHeader b{font-size:14px}.chatHeader small{display:none}.modelSelect{max-width:145px}.chatMessages{padding-top:18px}.empty h1{font-size:27px}.chatComposer{bottom:76px}.bottomNav{height:66px}
 }
+
+
+/* Compact mobile-first Student workspace */
+.studentPage{width:100%;max-width:760px;margin:0 auto;padding:42px 24px 110px;color:#1d2a40}
+.studentIntro{max-width:680px}
+.studentEyebrow{display:block;margin-bottom:10px;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#62738e}
+.studentIntro h1{margin:0;font-size:clamp(34px,5vw,56px);line-height:1.04;letter-spacing:-.05em}
+.studentIntro p{margin:14px 0 0;color:#718099;font-size:16px;line-height:1.6}
+
+.studentModes{display:flex;flex-wrap:wrap;gap:7px;margin:26px 0 34px;padding:0}
+.studentMode{appearance:none;border:0!important;background:transparent!important;color:#64738a!important;box-shadow:none!important;padding:6px 2px!important;margin:0 12px 0 0;border-radius:0!important;font:700 13px inherit!important;cursor:pointer}
+.studentMode:hover{color:#315eea!important;transform:none!important}
+.studentMode.active{color:#315eea!important;border-bottom:2px solid #315eea!important}
+
+.studentStudy{padding:22px 0;border-top:1px solid #e2e8f1}
+.studentStudy h2{margin:0;font-size:22px;letter-spacing:-.025em}
+.studentHelp{margin:7px 0 16px;color:#718099;font-size:13px}
+.studentInputRow{display:flex;gap:9px;align-items:center}
+.studentInputRow input{flex:1;min-width:0;height:50px;border:1px solid #dce4ef;border-radius:13px;padding:0 15px;background:#fff;font:inherit;color:#26354c;outline:none}
+.studentInputRow input:focus{border-color:#6384ed;box-shadow:0 0 0 4px rgba(49,94,234,.1)}
+.studentStart{flex:none;display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 13px;border-radius:10px;background:#315eea;color:#fff!important;font-size:13px;font-weight:850}
+
+@media(max-width:540px){
+  .studentPage{padding:24px 16px 92px}
+  .studentIntro h1{font-size:34px}
+  .studentIntro p{font-size:14px}
+  .studentModes{gap:3px;margin:21px 0 27px}
+  .studentMode{font-size:12px!important;margin-right:9px;padding:5px 1px!important}
+  .studentStudy{padding-top:19px}
+  .studentStudy h2{font-size:20px}
+  .studentInputRow{align-items:stretch}
+  .studentStart{min-width:76px}
+}
