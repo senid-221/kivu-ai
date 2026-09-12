@@ -6,7 +6,7 @@ import { BrainCircuit, ChevronDown, FileText, GraduationCap, Image as ImageIcon,
 
 const models: Record<string, { name: string; subtitle: string; greeting: string }> = {
   teacher: { name: "Umwarimu", subtitle: "Ibisobanuro byoroshye • Ubuyobozi bwumvikana", greeting: "Ni iki nagufasha kwiga uyu munsi?" },
-  developer: { name: "Developer", subtitle: "Build websites and apps • Byoroshye", greeting: "Ni iki ushaka kubaka?" },
+  developer: { name: "Developer", subtitle: "Kubaka websites na applications • Byoroshye", greeting: "Ni iki ushaka kubaka?" },
   student: { name: "Umunyeshuri", subtitle: "Iga, subiramo kandi usobanukirwe", greeting: "Ni iki turi kwiga uyu munsi?" },
   seller: { name: "Ubucuruzi", subtitle: "Business, sales and growth guidance", greeting: "Ni iki ushaka kunoza?" },
   nesa_exam_rev: { name: "NESA Isuzuma", subtitle: "Ibizamini byabanje, imyitozo n’ibisobanuro byumvikana", greeting: "Baza ikibazo cyo gusubiramo cyangwa usabe imyitozo ishingiye ku bizamini byabanje." },
