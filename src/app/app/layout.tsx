@@ -8,7 +8,7 @@ export default function AppLayout({children}:{children:React.ReactNode}){
   {icon:<BarChart3 size={18}/>,label:"Progress",href:"/app/progress"},
   {icon:<Upload size={18}/>,label:"Materials",href:"/app/upload"},
  ];
- return <div className="kivuApp agentShell">
+ return <div className="edukaApp agentShell">
    <aside className="appSidebar agentSidebar">
     <Link className="appBrand agentSideBrand" href="/app"><span className="brandCube"><Bot size={18}/></span><span>EDUKA</span></Link>
     <Link className="agentNewChat" href="/app/chat"><MessageSquarePlus size={17}/> New chat</Link>
