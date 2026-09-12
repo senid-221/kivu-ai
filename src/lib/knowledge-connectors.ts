@@ -93,6 +93,64 @@ const PROVIDERS: Record<KnowledgeMode, Provider[]> = {
   ]
 };
 
+const SUBJECT_SOURCE_MAP: Record<AcademicSubject, Partial<Record<KnowledgeMode, string[]>>> = {
+  physics: {
+    student: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
+    teacher: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
+    nesa_exam_rev: ["NESA Official Resources", "REB E-Learning", "OpenStax"]
+  },
+  chemistry: {
+    student: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
+    teacher: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
+    nesa_exam_rev: ["NESA Official Resources", "REB E-Learning", "OpenStax"]
+  },
+  biology: {
+    student: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
+    teacher: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
+    nesa_exam_rev: ["NESA Official Resources", "REB E-Learning", "OpenStax"]
+  },
+  mathematics: {
+    student: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
+    teacher: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
+    nesa_exam_rev: ["NESA Official Resources", "REB E-Learning", "OpenStax"]
+  },
+  computer_science: {
+    student: ["REB E-Learning", "Wikibooks", "MIT OpenCourseWare"],
+    teacher: ["REB E-Learning", "MIT OpenCourseWare", "Wikibooks"],
+    developer: ["MDN Web Docs", "Python Documentation", "React Documentation", "Node.js Documentation", "Next.js Documentation"]
+  },
+  english: {
+    student: ["REB E-Learning", "Wikibooks", "Wikiversity"],
+    teacher: ["REB E-Learning", "Wikibooks", "Wikiversity"]
+  },
+  history: {
+    student: ["REB E-Learning", "Wikibooks", "MIT OpenCourseWare"],
+    teacher: ["REB E-Learning", "MIT OpenCourseWare", "Wikibooks"]
+  },
+  geography: {
+    student: ["REB E-Learning", "OpenStax", "Wikibooks"],
+    teacher: ["REB E-Learning", "OpenStax", "Wikibooks"]
+  },
+  general: {}
+};
+
+function providersForSubject(mode: KnowledgeMode, subject: AcademicSubject) {
+  const providers = PROVIDERS[mode] || [];
+  const priority = SUBJECT_SOURCE_MAP[subject]?.[mode] || [];
+  if (!priority.length) return providers;
+  return [...providers].sort((a, b) => {
+    const ai = priority.indexOf(a.name);
+    const bi = priority.indexOf(b.name);
+    return (ai < 0 ? 999 : ai) - (bi < 0 ? 999 : bi);
+  });
+}
+
+function buildSubjectQuery(query: string, subject: AcademicSubject) {
+  if (subject === "general") return query;
+  const label = subject.replace("_", " ");
+  return query.toLowerCase().includes(label) ? query : label + " " + query;
+}
+
 function stripHtml(value: string) {
   return value
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
@@ -293,8 +351,9 @@ async function retrieveSourceContent(source: KnowledgeSource, query: string) {
 
 export async function retrieveKnowledge(mode: KnowledgeMode, query: string): Promise<KnowledgeSource[]> {
   const subject = detectSubject(query);
-  const providers = PROVIDERS[mode] || [];
-  const groups = await Promise.all(providers.map(provider => searchProvider(provider, query)));
+  const providers = providersForSubject(mode, subject);
+  const subjectQuery = buildSubjectQuery(query, subject);
+  const groups = await Promise.all(providers.map(provider => searchProvider(provider, subjectQuery)));
   // Keep a wider candidate pool before enrichment so subject-specific evidence can win.
   const sources = groups.flat().slice(0, 12);
 
