@@ -60,7 +60,7 @@ async function searchProvider(provider: Provider, query: string): Promise<Knowle
     try {
       const response = await fetch(searchUrl, {
         headers: {
-          "User-Agent": "Mozilla/5.0 KIVU-AI Knowledge Connector",
+          "User-Agent": "Mozilla/5.0 EDUKA Knowledge Connector",
           Accept: "text/html,application/xhtml+xml"
         },
         cache: "no-store",
@@ -154,7 +154,7 @@ async function retrieveSourceContent(source: KnowledgeSource, query: string) {
 
     const response = await fetch(source.url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 KIVU-AI Knowledge Retriever",
+        "User-Agent": "Mozilla/5.0 EDUKA Knowledge Retriever",
         Accept: "text/html,application/xhtml+xml",
       },
       cache: "no-store",
