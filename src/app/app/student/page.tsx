@@ -4,25 +4,33 @@ import Link from "next/link";
 import { useState } from "react";
 
 const modes = [
-  "Learn a topic",
-  "Revise a lesson",
-  "Practice questions",
-  "Explain homework",
+  "Learn",
+  "Revise",
+  "Practice",
+  "Homework",
 ];
+
+const modePrompts:Record<string,string> = {
+  Learn: "Teach me this topic clearly",
+  Revise: "Help me revise this lesson",
+  Practice: "Give me practice questions about",
+  Homework: "Explain and help me solve this homework",
+};
 
 export default function Student() {
   const [mode, setMode] = useState(modes[0]);
   const [topic, setTopic] = useState("");
 
-  const prompt = topic.trim()
-    ? `${mode}: ${topic.trim()}`
-    : mode;
+  const cleanTopic = topic.trim();
+  const prompt = cleanTopic
+    ? `${modePrompts[mode]}: ${cleanTopic}`
+    : modePrompts[mode];
 
   return (
     <main className="studentPage">
       <section className="studentIntro">
         <span className="studentEyebrow">KIVU STUDENT</span>
-        <h1>Study in a way that helps you understand.</h1>
+        <h1>Study smarter.</h1>
         <p>Learn, revise and practice at your own pace.</p>
       </section>
 
@@ -40,21 +48,19 @@ export default function Student() {
       </nav>
 
       <section className="studentStudy">
-        <h2>{mode}</h2>
-        <p className="studentHelp">Tell KIVU AI what you want to study.</p>
-
+        <label htmlFor="study-topic">{mode} with KIVU AI</label>
         <div className="studentInputRow">
           <input
+            id="study-topic"
             value={topic}
             onChange={(event) => setTopic(event.target.value)}
             placeholder="What are you studying?"
-            aria-label="What are you studying?"
           />
           <Link
             className="studentStart"
             href={"/app/chat?model=student&prompt=" + encodeURIComponent(prompt)}
           >
-            Start →
+            Start
           </Link>
         </div>
       </section>
