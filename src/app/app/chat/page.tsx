@@ -12,7 +12,7 @@ function ChatContent(){
  const q=useSearchParams(),router=useRouter();const initial=q.get("model")||"teacher";
  const [modelId,setModelId]=useState(initial),[messages,setMessages]=useState<any[]>([]),[input,setInput]=useState(""),[loading,setLoading]=useState(false),[conversationId,setConversationId]=useState(q.get("conversation")||"");
  const model=models[modelId]||models.teacher;
- useEffect(()=>{setModelId(q.get("model")||"teacher")},[q]);
+ useEffect(()=>{const nextModel=q.get("model")||"teacher";setModelId(nextModel);if(!messages.length){setInput(q.get("prompt")||"")}},[q]);
  function changeModel(id:string){setModelId(id);setMessages([]);setConversationId("");router.replace("/app/chat?model="+id)}
  async function persist(next:any[]){const r=await fetch("/api/conversations",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:conversationId||undefined,title:next.find(x=>x.role==="user")?.content?.slice(0,60)||model.name,model:modelId,messages:next})});const d=await r.json();if(r.ok&&d.item&&!conversationId){setConversationId(d.item.id);router.replace("/app/chat?model="+modelId+"&conversation="+d.item.id)}}
  async function send(){const text=input.trim();if(!text||loading)return;const next=[...messages,{role:"user",content:text}];setMessages(next);setInput("");setLoading(true);try{const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({modelId,message:text})});const d=await r.json();const final=[...next,{role:"assistant",content:d.reply||d.error||"Unable to respond right now."}];setMessages(final);await persist(final)}catch{setMessages([...next,{role:"assistant",content:"Unable to respond right now. Please try again."}])}finally{setLoading(false)}}
