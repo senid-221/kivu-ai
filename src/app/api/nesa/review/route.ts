@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateGemini } from "@/lib/gemini";
+import { retrieveKnowledge, knowledgePrompt } from "@/lib/knowledge-connectors";
+import { cacheKnowledgeSources, searchIndexedKnowledge } from "@/lib/knowledge-rag";
 
 type Review = {
   correctAnswer: string;
@@ -18,20 +20,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Please provide a question." }, { status: 400 });
     }
 
+    const query = [body.subject || "General", question, body.options || ""].filter(Boolean).join("\n");
+    let sources = await searchIndexedKnowledge("nesa_exam_rev", query);
+    if (sources.length < 3) {
+      const freshSources = await retrieveKnowledge("nesa_exam_rev", query);
+      if (freshSources.length) await cacheKnowledgeSources("nesa_exam_rev", freshSources);
+      const known = new Set(sources.map((source) => source.url));
+      sources = [...sources, ...freshSources.filter((source) => !known.has(source.url))].slice(0, 6);
+    }
+
     const result = await generateGemini({
       systemInstruction:
-        "You are KIVU NESA EXAM REV. Return ONLY valid JSON with correctAnswer, explanation, keyConcept and revisionTip.",
-      parts: [
-        {
-          text:
-            "Subject: " +
-            (body.subject || "General") +
-            "\nQuestion: " +
-            question +
-            "\nOptions: " +
-            (body.options || "None"),
-        },
-      ],
+        "You are EDUKA NESA EXAM REVIEW. Return ONLY valid JSON with correctAnswer, explanation, keyConcept and revisionTip. Use verified REB learning sources when they support the question. Never invent an official source, quotation, page number, or citation. If source evidence is insufficient, make that clear in the explanation.\n\n" +
+        knowledgePrompt("nesa_exam_rev", sources),
+      parts: [{ text: "Subject: " + (body.subject || "General") + "\nQuestion: " + question + "\nOptions: " + (body.options || "None") }],
       temperature: 0.2,
       maxOutputTokens: 1800,
     });
