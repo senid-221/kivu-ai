@@ -10,7 +10,7 @@ export default function AppLayout({children}:{children:React.ReactNode}){
  ];
  return <div className="kivuApp agentShell">
    <aside className="appSidebar agentSidebar">
-    <Link className="appBrand agentSideBrand" href="/app"><span className="brandCube"><Bot size={18}/></span><span>KIVU AI</span></Link>
+    <Link className="appBrand agentSideBrand" href="/app"><span className="brandCube"><Bot size={18}/></span><span>EDUKA</span></Link>
     <Link className="agentNewChat" href="/app/chat"><MessageSquarePlus size={17}/> New chat</Link>
     <div className="navLabel">WORKSPACE</div>
     <nav>{nav.slice(1).map(x=><Link href={x.href} key={x.label}><span>{x.icon}</span>{x.label}</Link>)}</nav>
@@ -23,7 +23,7 @@ export default function AppLayout({children}:{children:React.ReactNode}){
     <div className="agentSidebarFooter"><span className="agentStatusDot"/> AI systems ready</div>
    </aside>
    <header className="mobileAppHeader">
-    <Link href="/app/chat" className="mobileAgentBrand"><span className="brandCube"><Bot size={16}/></span> KIVU AI</Link>
+    <Link href="/app/chat" className="mobileAgentBrand"><span className="brandCube"><Bot size={16}/></span> EDUKA</Link>
     <Link href="/app/history" aria-label="Conversation history"><History size={20}/></Link>
    </header>
    <div className="appContent">{children}</div>
