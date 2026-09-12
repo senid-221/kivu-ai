@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 
-const modes = ["Kwiga", "Gusubiramo", "Kwimenyereza", "Umukoro"];
+const modes = ["Kwiga", "Gusubiramo", "Imenyereze", "Umukoro"];
 const modePrompts:Record<string,string> = {
   Kwiga: "Nyigisha iki gice mu buryo bworoshye",
   Gusubiramo: "Mfasha gusubiramo iri somo",
-  Kwimenyereza: "Mpa imyitozo kuri",
+  Imenyereze: "Mpa imyitozo kuri",
   Umukoro: "Sobanura kandi umfasha gukemura uyu mukoro",
 };
 
@@ -28,9 +28,9 @@ export default function Student() {
     </nav>
     <section className="studentStudy">
       <label htmlFor="study-topic">{mode} hamwe na EDUKA</label>
-      <p className="studentHelp">Write your topic clearly and EDUKA will help you step by step.</p>
+      <p className="studentHelp">Andika neza icyo ushaka kwiga, EDUKA ikagufasha intambwe ku yindi.</p>
       <div className="studentInputRow">
-        <input id="study-topic" value={topic} onChange={(event) => setTopic(event.target.value)} placeholder="Ni iki uri kwiga? / What are you studying?" />
+        <input id="study-topic" value={topic} onChange={(event) => setTopic(event.target.value)} placeholder="Ni iki nagufasha kwiga uyu munsi?" />
         <Link className="studentStart" href={"/app/chat?model=student&prompt=" + encodeURIComponent(prompt)}>Tangira</Link>
       </div>
     </section>
