@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { readSession } from "@/lib/auth";
 import { generateGemini } from "@/lib/gemini";
-import { retrieveKnowledge, knowledgePrompt } from "@/lib/knowledge-connectors";
+import { retrieveKnowledge, knowledgePrompt, evidenceSources } from "@/lib/knowledge-connectors";
 import { cacheKnowledgeSources, searchIndexedKnowledge } from "@/lib/knowledge-rag";
 
 async function uid(req: NextRequest) {
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     const result = await generateGemini({
       systemInstruction:
         "You are EDUKA NESA EXAM REVIEW. Return ONLY valid JSON with correctAnswer, explanation, keyConcept and revisionTip. Use verified REB learning sources when they support the question. Never claim an official source was consulted unless it appears in the evidence. If evidence is insufficient, say so clearly in the explanation and give a careful educational answer.\n\n" +
-        knowledgePrompt("nesa_exam_rev", sources),
+        knowledgePrompt("nesa_exam_rev", sources, query),
       parts: [{ text: "Subject: " + (subject || "General") + "\nQuestion: " + question + "\nOptions: " + (options || "") }],
       temperature: 0.2,
       maxOutputTokens: 1800,
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ id: review.id, ...reviewData, model: result.model, sources: sources.map((source) => ({ title: source.title, url: source.url, provider: source.provider, usedAsEvidence: Boolean(source.excerpts?.length) })) });
+    return NextResponse.json({ id: review.id, ...reviewData, model: result.model, sources: evidenceSources(sources, query, "nesa_exam_rev").map((source) => ({ title: source.title, url: source.url, provider: source.provider, usedAsEvidence: true })) });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unable to review this exam question.";
