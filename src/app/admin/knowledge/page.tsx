@@ -56,8 +56,8 @@ export default function KnowledgeAdminPage() {
 
   return (
     <main style={{ maxWidth: 900, margin: "0 auto", padding: 20 }}>
-      <h1>Knowledge Indexer</h1>
-      <p>Add verified learning resources to the KIVU AI knowledge database.</p>
+      <h1>EDUKA Knowledge Admin</h1>
+      <p>Add verified learning resources to the EDUKA knowledge database. Admin access is protected by your ADMIN_EMAILS environment setting.</p>
 
       <label>AI Mode</label>
       <select value={mode} onChange={e => setMode(e.target.value)} style={{ width: "100%", padding: 12, margin: "8px 0 16px" }}>
