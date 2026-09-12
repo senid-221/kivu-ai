@@ -14,6 +14,13 @@ const models: Record<string, { name: string; subtitle: string; greeting: string 
 
 type Activity = { id: string; title: string; detail: string; icon: "search" | "file" | "think" };
 
+function cleanDisplayedAiText(value: unknown) {
+  return String(value ?? "")
+    .replace(/\*{1,3}/g, "")
+    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+    .replace(/^\s*[*•]\s+/gm, "- ");
+}
+
 function AgentActivity({ activity }: { activity: Activity[] }) {
   if (!activity.length) return null;
   return <div className="agentActivity">
@@ -146,7 +153,7 @@ function ChatContent() {
         </div>
       </div> : messages.map((m, i) => <div className={"agentMessage " + m.role} key={i}>
         {m.role === "assistant" && <div className="messageAvatar"><Sparkles size={15} /></div>}
-        <div className="messageBubble">{m.content}</div>
+        <div className="messageBubble">{m.role === "assistant" ? cleanDisplayedAiText(m.content) : m.content}</div>
       </div>)}
       {loading && <AgentActivity activity={activity} />}
     </section>
