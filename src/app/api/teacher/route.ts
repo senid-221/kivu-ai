@@ -1,1 +1,40 @@
-import { NextRequest, NextResponse } from "next/server"; import { readSession } from "../../../lib/auth"; async function ask(p:string){const k=process.env.GEMINI_API_KEY;if(!k)throw Error("GEMINI_API_KEY is missing");const m=process.env.GEMINI_MODEL||"gemini-2.5-flash";const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent?key="+encodeURIComponent(k),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:p}]}]})});const d:any=await r.json();if(!r.ok)throw Error(d?.error?.message||"Gemini error");return d?.candidates?.[0]?.content?.parts?.map((x:any)=>x.text||"").join("\n")||""} export async function POST(req:NextRequest){try{const t=req.cookies.get("kivu_session")?.value;if(!t)throw Error("Unauthorized");await readSession(t);const {message,subject,level}=await req.json();if(!message?.trim())return NextResponse.json({error:"Ask your teacher a question."},{status:400});return NextResponse.json({answer:await ask("You are KIVU AI Teacher, a patient expert tutor. Teach step by step with examples. Subject: "+(subject||"General")+". Level: "+(level||"Student")+". Question: "+message)})}catch(e){return NextResponse.json({error:e instanceof Error?e.message:"Unable to generate a lesson."},{status:500})}}
+import { NextRequest, NextResponse } from "next/server";
+import { readSession } from "@/lib/auth";
+import { generateGemini } from "@/lib/gemini";
+
+export async function POST(req: NextRequest) {
+  try {
+    const token = req.cookies.get("kivu_session")?.value;
+    if (!token) throw new Error("Unauthorized");
+    await readSession(token);
+
+    const { message, subject, level } = await req.json();
+    if (!message?.trim()) {
+      return NextResponse.json({ error: "Ask your teacher a question." }, { status: 400 });
+    }
+
+    const result = await generateGemini({
+      systemInstruction:
+        "You are KIVU AI Teacher, a patient expert tutor. Teach step by step with examples, then help the student understand.",
+      parts: [
+        {
+          text:
+            "Subject: " +
+            (subject || "General") +
+            "\nLevel: " +
+            (level || "Student") +
+            "\nQuestion: " +
+            message,
+        },
+      ],
+    });
+
+    return NextResponse.json({ answer: result.text, model: result.model });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to generate a lesson.";
+    return NextResponse.json(
+      { error: message },
+      { status: message === "Unauthorized" ? 401 : 500 }
+    );
+  }
+}
