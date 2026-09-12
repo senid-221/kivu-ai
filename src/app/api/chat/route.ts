@@ -42,9 +42,9 @@ export async function POST(req: NextRequest) {
     }
     if (message) content.push({ type: "text", text: message });
 
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const apiKey = process.env.ANTHROPIC_API_KEY;\n    if (!apiKey) return NextResponse.json({ error: "AI service is not configured. Add ANTHROPIC_API_KEY in your hosting environment variables." }, { status: 503 });\n    const client = new Anthropic({ apiKey });
     const response = await client.messages.create({
-      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514",
+      model: process.env.ANTHROPIC_MODEL || process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514",
       max_tokens: 2200,
       system: prompts[modelId],
       messages: [{ role: "user", content }]
@@ -53,6 +53,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ reply: getText(response) || "I could not generate a response. Please try again.", modelId });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    return NextResponse.json({ error: "Unable to complete this request right now." }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Unknown AI service error";\n    console.error("KIVU AI chat error:", error);\n    return NextResponse.json({ error: "Unable to complete this request right now.", details: process.env.NODE_ENV === "development" ? message : undefined }, { status: 500 });
   }
 }
