@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readSession } from "@/lib/auth";
 import { generateGemini, GeminiPart } from "@/lib/gemini";
-import { rebSourcesPrompt, searchRebLibrary } from "@/lib/reb-library";
+import { knowledgePrompt, retrieveKnowledge, KnowledgeSource } from "@/lib/knowledge-connectors";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -72,21 +72,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    let rebContext = "";
-    let rebSources: { title: string; url: string; snippet: string }[] = [];
-
-    // For educational questions, look for public resources on the official
-    // REB e-Learning platform before asking Gemini to answer.
-    if (message && ["teacher", "student", "nesa_exam_rev"].includes(modelId)) {
-      rebSources = await searchRebLibrary(message);
-      rebContext = rebSourcesPrompt(rebSources);
-    }
+    let sourceContext = "";
+    let sources: KnowledgeSource[] = [];
 
     if (message) {
+      sources = await retrieveKnowledge(modelId, message);
+      sourceContext = knowledgePrompt(modelId, sources);
       parts.push({
-        text: rebContext
-          ? rebContext + "\n\nSTUDENT QUESTION:\n" + message
-          : message,
+        text: sourceContext + "\n\nUSER QUESTION:\n" + message,
       });
     }
 
@@ -103,7 +96,7 @@ export async function POST(req: NextRequest) {
       modelId,
       provider: "gemini",
       model: result.model,
-      sources: rebSources,
+      sources,
     });
   } catch (error) {
     console.error("KIVU AI Gemini chat error:", error);
