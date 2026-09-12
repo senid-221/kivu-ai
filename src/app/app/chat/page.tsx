@@ -88,8 +88,11 @@ function ChatContent() {
         setActivity([{ id: "thinking", title: "Understanding your request", detail: "Preparing the best answer", icon: "think" }, ...fileSteps]);
         const form = new FormData(); form.append("file", file);
         const r = await fetch("/api/materials/analyze", { method: "POST", body: form });
-        const d = await r.json();
-        attachmentText += "\n\nFILE: " + file.name + "\n" + (d.text || d.error || "Could not extract text.");
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          throw new Error(typeof d.error === "string" ? d.error : "Could not analyze " + file.name + ".");
+        }
+        attachmentText += "\n\nFILE: " + file.name + "\n" + (d.text || "Could not extract text.");
       }
 
       const images: { mediaType: string; data: string }[] = [];
@@ -105,8 +108,13 @@ function ChatContent() {
       setActivity(prev => [...prev, { id: "answer", title: "Generating an answer", detail: "KIVU AI is putting everything together", icon: "think" }]);
       const prompt = (text || "Please analyze this uploaded material.") + attachmentText;
       const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ modelId, message: prompt, images }) });
-      const d = await r.json();
-      const final = [...next, { role: "assistant", content: d.reply || d.error || "Unable to respond right now." }];
+      const d = await r.json().catch(() => ({}));
+      const reply = r.ok && typeof d.reply === "string"
+        ? d.reply
+        : (typeof d.error === "string" && !d.error.trim().startsWith("{")
+          ? d.error
+          : "KIVU AI could not complete this request right now. Please try again later.");
+      const final = [...next, { role: "assistant", content: reply }];
       setMessages(final); await persist(final);
     } catch {
       setMessages([...next, { role: "assistant", content: "Unable to analyze this file right now. Please try again." }]);
