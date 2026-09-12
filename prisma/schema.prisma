@@ -19,6 +19,13 @@ model User {
   studySessions    StudySession[]
   achievements     UserAchievement[]
   reminders        StudyReminder[]
+  phone            String?
+  bio              String?
+  location         String?
+  education        String?
+  skills           String?
+  avatar           String?
+  cvName           String?
 }
 
 model Conversation {
