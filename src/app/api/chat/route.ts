@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readSession } from "@/lib/auth";
 import { generateGemini, GeminiPart } from "@/lib/gemini";
+import { rebSourcesPrompt, searchRebLibrary } from "@/lib/reb-library";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -71,7 +72,23 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (message) parts.push({ text: message });
+    let rebContext = "";
+    let rebSources: { title: string; url: string; snippet: string }[] = [];
+
+    // For educational questions, look for public resources on the official
+    // REB e-Learning platform before asking Gemini to answer.
+    if (message && ["teacher", "student", "nesa_exam_rev"].includes(modelId)) {
+      rebSources = await searchRebLibrary(message);
+      rebContext = rebSourcesPrompt(rebSources);
+    }
+
+    if (message) {
+      parts.push({
+        text: rebContext
+          ? rebContext + "\n\nSTUDENT QUESTION:\n" + message
+          : message,
+      });
+    }
 
     const result = await generateGemini({
       parts,
@@ -86,6 +103,7 @@ export async function POST(req: NextRequest) {
       modelId,
       provider: "gemini",
       model: result.model,
+      sources: rebSources,
     });
   } catch (error) {
     console.error("KIVU AI Gemini chat error:", error);
