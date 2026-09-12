@@ -2,7 +2,7 @@
 
 import { ChangeEvent, Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, FileText, Image as ImageIcon, Loader2, Paperclip, Plus, Search, Send, Sparkles, X } from "lucide-react";
+import { ChevronDown, FileText, Image as ImageIcon, Loader2, Paperclip, Plus, Send, Sparkles, X } from "lucide-react";
 
 const models: Record<string, { name: string; subtitle: string; greeting: string }> = {
   teacher: { name: "Teacher", subtitle: "Clear explanations and practical guidance", greeting: "How can I help you learn today?" },
@@ -12,25 +12,14 @@ const models: Record<string, { name: string; subtitle: string; greeting: string 
   nesa_exam_rev: { name: "NESA Exam", subtitle: "Exam revision with detailed explanations", greeting: "Upload an exam or ask a revision question." },
 };
 
-type Activity = { id: string; title: string; detail: string; icon: "search" | "file" | "think" };
-
-function cleanDisplayedAiText(value: unknown) {
-  return String(value ?? "")
-    .replace(/\*{1,3}/g, "")
-    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
-    .replace(/^\s*[*•]\s+/gm, "- ");
-}
-
-function AgentActivity({ activity }: { activity: Activity[] }) {
-  if (!activity.length) return null;
-  return <div className="agentActivity">
-    <div className="agentActivityTitle"><Sparkles size={14} /> EDUKA is working</div>
-    {activity.map(item => <div className="agentStep" key={item.id}>
-      <span className="agentStepIcon">{item.icon === "search" ? <Search size={15} /> : item.icon === "file" ? <FileText size={15} /> : <Sparkles size={15} />}</span>
-      <div><b>{item.title}</b><small>{item.detail}</small></div>
-      <span className="agentDone">✓</span>
-    </div>)}
-  </div>;
+function ThinkingIndicator() {
+  return (
+    <div className="thinkingIndicator" role="status" aria-live="polite">
+      <span className="thinkingIcon"><Sparkles size={18} /></span>
+      <span>Thinking</span>
+      <span className="thinkingDots" aria-hidden="true"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span>
+    </div>
+  );
 }
 
 function ChatContent() {
@@ -44,7 +33,6 @@ function ChatContent() {
   const [loading, setLoading] = useState(false);
   const [conversationId, setConversationId] = useState(q.get("conversation") || "");
   const [files, setFiles] = useState<File[]>([]);
-  const [activity, setActivity] = useState<Activity[]>([]);
   const model = models[modelId] || models.teacher;
 
   useEffect(() => {
@@ -54,7 +42,7 @@ function ChatContent() {
   }, [q]);
 
   function changeModel(id: string) {
-    setModelId(id); setMessages([]); setConversationId(""); setFiles([]); setActivity([]);
+    setModelId(id); setMessages([]); setConversationId(""); setFiles([]);
     router.replace("/app/chat?model=" + id);
   }
 
@@ -85,14 +73,10 @@ function ChatContent() {
     const display = [text, labels].filter(Boolean).join("\n");
     const next = [...messages, { role: "user", content: display }];
     setMessages(next); setInput(""); setFiles([]); setLoading(true);
-    setActivity([{ id: "thinking", title: "Understanding your request", detail: "Preparing the best answer", icon: "think" }]);
 
     try {
       let attachmentText = "";
-      const fileSteps: Activity[] = [];
       for (const file of selectedFiles) {
-        fileSteps.push({ id: file.name, title: "Reading " + file.name, detail: "Extracting useful information", icon: "file" });
-        setActivity([{ id: "thinking", title: "Understanding your request", detail: "Preparing the best answer", icon: "think" }, ...fileSteps]);
         const form = new FormData(); form.append("file", file);
         const r = await fetch("/api/materials/analyze", { method: "POST", body: form });
         const d = await r.json().catch(() => ({}));
@@ -112,7 +96,6 @@ function ChatContent() {
         if (data) images.push({ mediaType: file.type, data });
       }
 
-      setActivity(prev => [...prev, { id: "answer", title: "Generating an answer", detail: "EDUKA is putting everything together", icon: "think" }]);
       const prompt = (text || "Please analyze this uploaded material.") + attachmentText;
       const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ modelId, message: prompt, images }) });
       const d = await r.json().catch(() => ({}));
@@ -129,7 +112,7 @@ function ChatContent() {
           ? error.message
           : "EDUKA could not complete this request right now. Please try again.";
       setMessages([...next, { role: "assistant", content: message }]);
-    } finally { setLoading(false); setActivity([]); }
+    } finally { setLoading(false); }
   }
 
   return <main className="agentChat">
@@ -155,7 +138,7 @@ function ChatContent() {
         {m.role === "assistant" && <div className="messageAvatar"><Sparkles size={15} /></div>}
         <div className="messageBubble">{m.role === "assistant" ? cleanDisplayedAiText(m.content) : m.content}</div>
       </div>)}
-      {loading && <AgentActivity activity={activity} />}
+      {loading && <ThinkingIndicator />}
     </section>
 
     <div className="agentComposerArea">
