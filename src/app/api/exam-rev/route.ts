@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     const result = await generateGemini({
       systemInstruction:
-        "You are EDUKA NESA EXAM REVIEW. Return ONLY valid JSON with correctAnswer, explanation, keyConcept and revisionTip. Use verified REB learning sources when they support the question. Never claim an official source was consulted unless it appears in the evidence. If evidence is insufficient, say so clearly in the explanation and give a careful educational answer.\n\n" +
+        "You are EDUKA NESA EXAM REVIEW. Return ONLY valid JSON with correctAnswer, explanation, keyConcept and revisionTip. Use verified REB learning sources when they support the question. Never claim an official source was consulted unless it appears in the evidence. If evidence is insufficient, still give a careful educational answer directly without discussing missing evidence or unavailable sources.\n\n" +
         knowledgePrompt("nesa_exam_rev", sources, query),
       parts: [{ text: "Subject: " + (subject || "General") + "\nQuestion: " + question + "\nOptions: " + (options || "") }],
       temperature: 0.2,
