@@ -103,3 +103,32 @@ form{max-width:860px}.shell form>div,.shell form>label{display:grid;gap:8px;marg
   .studentInputRow{grid-template-columns:1fr}
   .studentStart{width:100%}
 }
+
+
+/* Profile dashboard */
+.profileDashboard{width:100%;max-width:1080px;margin:0 auto;padding:28px 18px 100px}
+.profileHero{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:20px}
+.profileEyebrow,.profileCardHead span{display:block;font-size:10px;font-weight:800;letter-spacing:1.4px;color:#4056c6;margin-bottom:7px}
+.profileHero h1{margin:0;font-size:clamp(30px,6vw,44px);color:#14233d}
+.profileHero p{max-width:650px;margin:8px 0 0;color:#64748b;line-height:1.55}
+.profileSaveTop,.profileSave{border:0;background:#4056c6;color:#fff;border-radius:12px;padding:12px 17px;font-weight:750;white-space:nowrap}
+.profileIdentityCard,.profileCard{background:#fff;border:1px solid #e2e8f0;border-radius:18px}
+.profileIdentityCard{display:flex;align-items:center;gap:16px;padding:18px;margin-bottom:16px}
+.avatarWrap{position:relative;flex:none}
+.profileAvatar{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:#e9edff;color:#4056c6;font-weight:850;font-size:24px}
+.profileAvatar img{width:100%;height:100%;object-fit:cover}
+.avatarEdit{position:absolute;right:-2px;bottom:-2px;width:30px;height:30px;border:2px solid #fff;border-radius:50%;background:#14233d;color:#fff}
+.identityCopy h2{margin:0;color:#14233d;font-size:20px}.identityCopy p{margin:5px 0;color:#64748b}
+.textButton{padding:4px 0;border:0;background:none;color:#4056c6;font-weight:750}
+.profileNotice{padding:12px 14px;margin-bottom:16px;border-radius:12px;background:#fff2f2;color:#b42318}.profileNotice.success{background:#ecfdf3;color:#067647}
+.profileGrid{display:grid;grid-template-columns:1.25fr .75fr;gap:16px;margin-bottom:16px}
+.profileCard{padding:20px}.profileCardHead{margin-bottom:18px}.profileCardHead h2{margin:0;color:#14233d;font-size:20px}
+.profileFields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.profileField span,.profileTextareaLabel span{display:block;margin-bottom:7px;font-size:12px;font-weight:750;color:#475569}
+.profileField input,.profileTextareaLabel textarea{width:100%;border:1px solid #dbe2ea;border-radius:11px;padding:12px;background:#fbfcfe;color:#14233d;outline:none}
+.profileField input:focus,.profileTextareaLabel textarea:focus{border-color:#4056c6}
+.profileTextareaLabel{display:block;margin-top:15px}.profileTextareaLabel textarea{min-height:110px;resize:vertical}.profileTextareaLabel.compact textarea{min-height:90px}
+.documentsCard{margin-bottom:16px}.documentRow{display:flex;align-items:center;gap:13px;padding:14px;background:#f8fafc;border-radius:13px}
+.documentIcon{font-size:28px}.documentInfo{min-width:0;flex:1}.documentInfo strong{display:block;color:#14233d}.documentInfo p,.documentNote{margin:4px 0 0;color:#64748b;font-size:13px;line-height:1.5}.documentNote{margin-top:12px}
+.profileFooterActions{display:flex;justify-content:flex-end}.profileSave{padding:13px 22px}
+@media(max-width:700px){.profileDashboard{padding:22px 14px 90px}.profileHero{align-items:flex-start;flex-direction:column}.profileSaveTop{width:100%}.profileGrid{grid-template-columns:1fr}.profileFields{grid-template-columns:1fr}.profileCard{padding:17px}.profileIdentityCard{padding:15px}.documentRow{align-items:flex-start;flex-wrap:wrap}.documentInfo{width:calc(100% - 45px)}}
