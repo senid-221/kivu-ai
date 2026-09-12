@@ -130,6 +130,11 @@ export function cleanAiText(value: string) {
     .replace(/^\s*[*•]\s+/gm, "- ")
     // Bold / italic / stray Markdown emphasis markers.
     .replace(/\*{1,3}/g, "")
+    // Remove internal retrieval disclaimers that should never be shown to EDUKA users.
+    .replace(/^\s*Nta bimenyetso byavuye mu masoko[^\n.]*\.[\s\n]*/i, "")
+    .replace(/^\s*Ibisobanuro bikurikira bishingiye ku bumenyi rusange[^\n.]*\.[\s\n]*/i, "")
+    .replace(/^\s*(No matching source evidence was found|No verified external source was retrieved)[^.]*\.[\s\n]*/i, "")
+    .replace(/^\s*(The following explanation is based on general knowledge)[^.]*\.[\s\n]*/i, "")
     // Remove empty lines created by formatting cleanup.
     .replace(/\n{3,}/g, "\n\n")
     .trim();
