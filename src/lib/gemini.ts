@@ -73,7 +73,10 @@ async function listAvailableModels(apiKey: string, force = false): Promise<strin
 }
 
 async function selectModel(apiKey: string, requested?: string, force = false) {
-  const available: string[] = (await listAvailableModels(apiKey, force)) ?? [];
+  const availableModels = await listAvailableModels(apiKey, force);
+  const available: string[] = Array.isArray(availableModels)
+    ? availableModels
+    : [];
   const configured = normalizeModel(
     requested || process.env.GEMINI_MODEL || ""
   );
