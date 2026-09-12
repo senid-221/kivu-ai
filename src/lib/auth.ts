@@ -5,7 +5,7 @@ function key() {
   if (!secret && process.env.NODE_ENV === "production") {
     throw new Error("Server authentication is not configured.");
   }
-  return new TextEncoder().encode(secret || "kivu-ai-development-session");
+  return new TextEncoder().encode(secret || "eduka-development-session");
 }
 
 export async function createSession(userId: string) {
@@ -34,8 +34,8 @@ export async function requireAdmin(token: string | undefined) {
     throw new Error("Admin access is not configured.");
   }
 
-  const { kivuPrisma } = await import("@/lib/knowledge-rag");
-  const user = await kivuPrisma.user.findUnique({
+  const { edukaPrisma } = await import("@/lib/knowledge-rag");
+  const user = await edukaPrisma.user.findUnique({
     where: { id: userId },
     select: { email: true },
   });
