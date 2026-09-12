@@ -9,7 +9,7 @@ export const maxDuration = 60;
 const MODES: KnowledgeMode[] = ["teacher","student","nesa_exam_rev","developer","seller"];
 
 async function requireAdminUser(req: NextRequest) {
-  return requireAdmin(req.cookies.get("kivu_session")?.value);
+  return requireAdmin(req.cookies.get("eduka_session")?.value);
 }
 
 export async function GET(req: NextRequest) {
