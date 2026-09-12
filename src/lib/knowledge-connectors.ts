@@ -162,7 +162,7 @@ function combinationSubjects(combo: ALevelCombination) {
   return combo === "general" ? [] : A_LEVEL_COMBINATIONS[combo];
 }
 
-const SUBJECT_SOURCE_MAP: Record<AcademicSubject, Partial<Record<KnowledgeMode, string[]>>> = {
+const SUBJECT_SOURCE_MAP: Partial<Record<AcademicSubject, Partial<Record<KnowledgeMode, string[]>>>> = {
   physics: {
     student: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
     teacher: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
@@ -199,6 +199,39 @@ const SUBJECT_SOURCE_MAP: Record<AcademicSubject, Partial<Record<KnowledgeMode, 
   geography: {
     student: ["REB E-Learning", "OpenStax", "Wikibooks"],
     teacher: ["REB E-Learning", "OpenStax", "Wikibooks"]
+  },
+  agriculture: {
+    student: ["REB E-Learning", "OpenStax", "Wikibooks"],
+    teacher: ["REB E-Learning", "OpenStax", "Wikibooks"]
+  },
+  economics: {
+    student: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
+    teacher: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
+    nesa_exam_rev: ["NESA Official Resources", "REB E-Learning", "OpenStax"]
+  },
+  entrepreneurship: {
+    student: ["REB E-Learning", "MIT OpenCourseWare", "Wikibooks"],
+    teacher: ["REB E-Learning", "MIT OpenCourseWare", "Wikibooks"]
+  },
+  literature: {
+    student: ["REB E-Learning", "Wikibooks", "Wikiversity"],
+    teacher: ["REB E-Learning", "Wikibooks", "Wikiversity"]
+  },
+  kinyarwanda: {
+    student: ["REB E-Learning", "Wikibooks"],
+    teacher: ["REB E-Learning", "Wikibooks"]
+  },
+  french: {
+    student: ["REB E-Learning", "Wikibooks", "Wikiversity"],
+    teacher: ["REB E-Learning", "Wikibooks", "Wikiversity"]
+  },
+  religion: {
+    student: ["REB E-Learning", "Wikibooks", "Wikiversity"],
+    teacher: ["REB E-Learning", "Wikibooks", "Wikiversity"]
+  },
+  art: {
+    student: ["REB E-Learning", "Wikibooks"],
+    teacher: ["REB E-Learning", "Wikibooks"]
   },
   general: {}
 };
