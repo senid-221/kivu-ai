@@ -12,6 +12,18 @@ const models: Record<string, { name: string; subtitle: string; greeting: string 
   nesa_exam_rev: { name: "NESA Exam", subtitle: "Exam revision with detailed explanations", greeting: "Upload an exam or ask a revision question." },
 };
 
+function cleanDisplayedAiText(value: string) {
+  return String(value ?? "")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/_(.*?)_/g, "$1")
+    .replace(/`{1,3}/g, "")
+    .replace(/[•●▪◦]/g, "-")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function ThinkingIndicator() {
   return (
     <div className="thinkingIndicator" role="status" aria-live="polite">
