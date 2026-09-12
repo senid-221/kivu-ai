@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { readSession } from "@/lib/auth";
 import { generateGemini, GeminiPart } from "@/lib/gemini";
 import { knowledgePrompt, retrieveKnowledge, KnowledgeSource } from "@/lib/knowledge-connectors";
+import { cacheKnowledgeSources, searchIndexedKnowledge } from "@/lib/knowledge-rag";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -79,7 +80,20 @@ export async function POST(req: NextRequest) {
     let sources: KnowledgeSource[] = [];
 
     if (message) {
-      sources = await retrieveKnowledge(modelId, message);
+      // Fast path: search previously indexed book/page excerpts in PostgreSQL.
+      sources = await searchIndexedKnowledge(modelId, message);
+
+      // Cache miss: retrieve public official sources, then index useful excerpts
+      // so future questions can be answered faster from the local knowledge base.
+      if (!sources.length) {
+        sources = await retrieveKnowledge(modelId, message);
+        try {
+          await cacheKnowledgeSources(modelId, sources);
+        } catch (indexError) {
+          console.error("Knowledge indexing failed:", indexError);
+        }
+      }
+
       sourceContext = knowledgePrompt(modelId, sources);
       parts.push({
         text: sourceContext + "\n\nUSER QUESTION:\n" + message,
