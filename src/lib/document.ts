@@ -1,42 +1,60 @@
 import mammoth from "mammoth";
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
-type PdfTextItem = { str?: string };
+export type ExtractedDocument = {
+  text: string;
+  pages?: number;
+  truncated?: boolean;
+};
 
-export async function extractDocumentText(
-  buffer: Buffer,
-  name: string,
-  type: string,
-): Promise<string> {
-  const normalizedName = name.toLowerCase();
+function clean(text: string) {
+  return text.replace(/\u0000/g, "").replace(/\s+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+}
 
-  if (type.startsWith("text/") || normalizedName.endsWith(".txt")) {
-    return buffer.toString("utf8");
+export async function extractDocumentText(buffer: Buffer, name: string, type: string): Promise<ExtractedDocument> {
+  const lower = name.toLowerCase();
+
+  if (type.startsWith("text/") || /\.(txt|md|csv)$/i.test(lower)) {
+    return { text: clean(buffer.toString("utf8")) };
   }
 
-  if (normalizedName.endsWith(".docx")) {
-    return (await mammoth.extractRawText({ buffer })).value;
+  if (lower.endsWith(".docx")) {
+    const result = await mammoth.extractRawText({ buffer });
+    return { text: clean(result.value) };
   }
 
-  if (normalizedName.endsWith(".pdf") || type === "application/pdf") {
-    const document = await pdfjsLib.getDocument({
+  if (lower.endsWith(".doc")) {
+    throw new Error("Legacy .doc files are not supported. Please save the document as .docx or PDF.");
+  }
+
+  if (lower.endsWith(".pdf") || type === "application/pdf") {
+    // Dynamic import keeps PDF.js out of routes that do not process PDFs.
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const task = pdfjs.getDocument({
       data: new Uint8Array(buffer),
       useSystemFonts: true,
-    }).promise;
+      disableFontFace: true,
+      isEvalSupported: false,
+    });
 
-    let text = "";
+    const pdf = await task.promise;
+    const chunks: string[] = [];
+    const maxPages = Math.min(pdf.numPages, 40);
 
-    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
-      const page = await document.getPage(pageNumber);
+    for (let pageNumber = 1; pageNumber <= maxPages; pageNumber++) {
+      const page = await pdf.getPage(pageNumber);
       const content = await page.getTextContent();
-      const items = content.items as PdfTextItem[];
-      text += items.map((item) => item.str ?? "").join(" ") + "\n";
+      const pageText = (content.items as Array<{ str?: string }>).map((item) => item.str || "").join(" ");
+      if (pageText.trim()) chunks.push("[Page " + pageNumber + "]\n" + pageText);
       page.cleanup();
     }
 
-    await document.cleanup();
-    return text;
+    await pdf.cleanup();
+    return {
+      text: clean(chunks.join("\n\n")),
+      pages: pdf.numPages,
+      truncated: pdf.numPages > maxPages,
+    };
   }
 
-  throw new Error("Unsupported format");
+  throw new Error("Unsupported file format.");
 }
