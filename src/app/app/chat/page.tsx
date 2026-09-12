@@ -24,7 +24,7 @@ function cleanDisplayedAiText(value: unknown) {
 function AgentActivity({ activity }: { activity: Activity[] }) {
   if (!activity.length) return null;
   return <div className="agentActivity">
-    <div className="agentActivityTitle"><Sparkles size={14} /> KIVU AI is working</div>
+    <div className="agentActivityTitle"><Sparkles size={14} /> EDUKA is working</div>
     {activity.map(item => <div className="agentStep" key={item.id}>
       <span className="agentStepIcon">{item.icon === "search" ? <Search size={15} /> : item.icon === "file" ? <FileText size={15} /> : <Sparkles size={15} />}</span>
       <div><b>{item.title}</b><small>{item.detail}</small></div>
@@ -112,7 +112,7 @@ function ChatContent() {
         if (data) images.push({ mediaType: file.type, data });
       }
 
-      setActivity(prev => [...prev, { id: "answer", title: "Generating an answer", detail: "KIVU AI is putting everything together", icon: "think" }]);
+      setActivity(prev => [...prev, { id: "answer", title: "Generating an answer", detail: "EDUKA is putting everything together", icon: "think" }]);
       const prompt = (text || "Please analyze this uploaded material.") + attachmentText;
       const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ modelId, message: prompt, images }) });
       const d = await r.json().catch(() => ({}));
@@ -120,21 +120,21 @@ function ChatContent() {
         ? d.reply
         : (typeof d.error === "string" && !d.error.trim().startsWith("{")
           ? d.error
-          : "KIVU AI could not complete this request right now. Please try again later.");
+          : "EDUKA could not complete this request right now. Please try again later.");
       const final = [...next, { role: "assistant", content: reply }];
       setMessages(final); await persist(final);
     } catch (error) {
       const message =
         error instanceof Error && error.message
           ? error.message
-          : "KIVU AI could not complete this request right now. Please try again.";
+          : "EDUKA could not complete this request right now. Please try again.";
       setMessages([...next, { role: "assistant", content: message }]);
     } finally { setLoading(false); setActivity([]); }
   }
 
   return <main className="agentChat">
     <header className="agentHeader">
-      <div className="agentBrand"><span className="agentBrandMark"><Sparkles size={18} /></span><div><b>KIVU AI</b><small>AI Agent workspace</small></div></div>
+      <div className="agentBrand"><span className="agentBrandMark"><Sparkles size={18} /></span><div><b>EDUKA</b><small>AI Agent workspace</small></div></div>
       <div className="agentHeaderTools">
         <div className="agentModelWrap"><Sparkles size={14} /><select value={modelId} onChange={e => changeModel(e.target.value)} aria-label="Choose AI model">{Object.entries(models).map(([id, m]) => <option value={id} key={id}>{m.name}</option>)}</select><ChevronDown size={14} /></div>
       </div>
@@ -143,9 +143,9 @@ function ChatContent() {
     <section className="agentMessages">
       {!messages.length ? <div className="agentWelcome">
         <div className="agentWelcomeBadge"><Sparkles size={24} /></div>
-        <p className="agentEyebrow">KIVU AI AGENT</p>
+        <p className="agentEyebrow">EDUKA AGENT</p>
         <h1>{model.greeting}</h1>
-        <p>Ask a question, upload a PDF, document, exam paper or image, and let KIVU AI analyze it with you.</p>
+        <p>Ask a question, upload a PDF, document, exam paper or image, and let EDUKA analyze it with you.</p>
         <div className="agentPromptGrid">
           <button onClick={() => setInput("Explain this topic step by step")}>Explain a topic</button>
           <button onClick={() => setInput("Give me an example and test my understanding")}>Practice with me</button>
@@ -165,15 +165,15 @@ function ChatContent() {
       <div className="agentComposer">
         <input ref={fileInput} type="file" hidden multiple accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp" onChange={addFiles} />
         <button className="composerPlus" onClick={() => fileInput.current?.click()} aria-label="Upload file"><Plus size={21} /></button>
-        <textarea rows={1} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={"Message KIVU AI " + model.name + "..."} />
+        <textarea rows={1} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={"Message EDUKA " + model.name + "..."} />
         <button className="composerModel" onClick={() => {}} title="Current AI agent"><Sparkles size={14} /><span>{model.name}</span><ChevronDown size={13} /></button>
         <button className="composerSend" onClick={send} disabled={loading || (!input.trim() && !files.length)} aria-label="Send message">{loading ? <Loader2 size={18} className="spin" /> : <Send size={18} />}</button>
       </div>
-      <p className="agentDisclaimer">KIVU AI can make mistakes. Check important information.</p>
+      <p className="agentDisclaimer">EDUKA can make mistakes. Check important information.</p>
     </div>
   </main>;
 }
 
 export default function Chat() {
-  return <Suspense fallback={<main className="agentChat"><div className="agentWelcome"><div className="agentWelcomeBadge"><Sparkles size={24} /></div><h1>Loading KIVU AI...</h1></div></main>}><ChatContent /></Suspense>;
+  return <Suspense fallback={<main className="agentChat"><div className="agentWelcome"><div className="agentWelcomeBadge"><Sparkles size={24} /></div><h1>Loading EDUKA...</h1></div></main>}><ChatContent /></Suspense>;
 }
