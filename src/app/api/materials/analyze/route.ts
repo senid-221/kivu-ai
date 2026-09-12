@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       text: text || "[No selectable text was found in this document.]",
       pages: extracted.pages,
       truncated: extracted.truncated || false,
-      scanned: !text
+      scanned: extracted.scanned || !text
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to analyze this file.";
