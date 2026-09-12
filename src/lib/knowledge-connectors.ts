@@ -162,7 +162,7 @@ function combinationSubjects(combo: ALevelCombination) {
   return combo === "general" ? [] : A_LEVEL_COMBINATIONS[combo];
 }
 
-const SUBJECT_SOURCE_MAP: Partial<Record<AcademicSubject, Partial<Record<KnowledgeMode, string[]>>>> = {
+const SUBJECT_SOURCE_MAP: Record<AcademicSubject, Partial<Record<KnowledgeMode, string[]>>> = {
   physics: {
     student: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
     teacher: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
