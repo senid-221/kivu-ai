@@ -1,6 +1,13 @@
 export type GeminiPart =
   | { text: string }
-  | { inlineData: { mimeType: string; data: string } };
+  | { inlineData: { mimeType: string; data: string } }
+  | { fileData: { mimeType: string; fileUri: string } };
+
+export type GeminiUploadedFile = {
+  uri: string;
+  mimeType: string;
+  name?: string;
+};
 
 type GeminiRequest = {
   parts: GeminiPart[];
@@ -147,6 +154,68 @@ function providerError(status: number, data: any) {
   if (status >= 500) return "Gemini is temporarily busy. Please try again in a moment.";
 
   return message;
+}
+
+/**
+ * Upload a larger document to the Gemini Files API. This avoids very large
+ * base64 JSON requests and lets Gemini read PDFs with native document vision.
+ */
+export async function uploadGeminiFile(
+  bytes: Uint8Array,
+  mimeType: string,
+  displayName: string
+): Promise<GeminiUploadedFile> {
+  const apiKey = getApiKey();
+
+  const start = await fetch(
+    "https://generativelanguage.googleapis.com/upload/v1beta/files?key=" +
+      encodeURIComponent(apiKey),
+    {
+      method: "POST",
+      headers: {
+        "X-Goog-Upload-Protocol": "resumable",
+        "X-Goog-Upload-Command": "start",
+        "X-Goog-Upload-Header-Content-Length": String(bytes.byteLength),
+        "X-Goog-Upload-Header-Content-Type": mimeType,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ file: { display_name: displayName } }),
+    }
+  );
+
+  if (!start.ok) {
+    const data = await start.json().catch(() => ({}));
+    throw new Error(providerError(start.status, data));
+  }
+
+  const uploadUrl = start.headers.get("x-goog-upload-url");
+  if (!uploadUrl) throw new Error("Gemini did not return a file upload URL.");
+
+  const uploaded = await fetch(uploadUrl, {
+    method: "POST",
+    headers: {
+      "X-Goog-Upload-Offset": "0",
+      "X-Goog-Upload-Command": "upload, finalize",
+      "Content-Type": mimeType,
+    },
+    body: bytes,
+  });
+
+  const data = await uploaded.json().catch(() => ({}));
+  if (!uploaded.ok || !data?.file?.uri) {
+    throw new Error(
+      typeof data?.error?.message === "string"
+        ? data.error.message
+        : "Gemini could not upload this document."
+    );
+  }
+
+  const file = data.file;
+  return {
+    uri: String(file.uri),
+    mimeType: String(file.mimeType || mimeType),
+    name: typeof file.name === "string" ? file.name : undefined,
+  };
 }
 
 export async function generateGemini(request: GeminiRequest) {
