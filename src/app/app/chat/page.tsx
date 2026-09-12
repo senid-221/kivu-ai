@@ -23,7 +23,12 @@ function ChatContent(){
    for(const file of files){const form=new FormData();form.append("file",file);const r=await fetch("/api/materials/analyze",{method:"POST",body:form});const d=await r.json();attachmentText+="\n\nFILE: "+file.name+"\n"+(d.text||d.error||"Could not extract text.");}
    setFiles([]);
    const prompt=(text||"Please analyze this uploaded material.")+attachmentText;
-   const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({modelId,message:prompt})});
+   const images:any[]=[];
+   for(const file of files.filter(f=>f.type.startsWith("image/"))){
+     const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(",")[1]||"");reader.onerror=reject;reader.readAsDataURL(file)});
+     if(data)images.push({mediaType:file.type,data});
+   }
+   const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({modelId,message:prompt,images})});
    const d=await r.json();const final=[...next,{role:"assistant",content:d.reply||d.error||"Unable to respond right now."}];setMessages(final);await persist(final)
   }catch{setMessages([...next,{role:"assistant",content:"Unable to analyze this file right now. Please try again."}])}finally{setLoading(false)}
  }
