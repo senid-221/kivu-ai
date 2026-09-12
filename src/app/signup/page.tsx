@@ -28,7 +28,7 @@ export default function SignUp() {
         setError(data.error || "Unable to create your account.");
         return;
       }
-      router.push("/app");
+      router.replace("/app/chat");
       router.refresh();
     } catch {
       setError("Unable to connect right now. Please try again.");
