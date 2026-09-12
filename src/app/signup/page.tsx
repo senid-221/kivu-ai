@@ -38,30 +38,30 @@ export default function SignUp() {
   }
 
   return (
-    <main className="kivuAuth">
-      <section className="kivuAuthVisual">
-        <Link href="/" className="kivuLogo"><span>✦</span> EDUKA</Link>
-        <div className="kivuVisualCopy">
-          <span className="kivuEyebrow">LEARNING FOR EVERYONE</span>
+    <main className="edukaAuth">
+      <section className="edukaAuthVisual">
+        <Link href="/" className="edukaLogo"><span>✦</span> EDUKA</Link>
+        <div className="edukaVisualCopy">
+          <span className="edukaEyebrow">LEARNING FOR EVERYONE</span>
           <h2>Build your future through <em>AI.</em></h2>
           <p>Learn, create, revise and grow with intelligent tools designed around you.</p>
-          <div className="kivuFeatureList">
+          <div className="edukaFeatureList">
             <div><b>✦</b><span><strong>Learn faster</strong><small>Study with your personal AI teacher</small></span></div>
             <div><b>◈</b><span><strong>Create smarter</strong><small>Build websites, apps and systems</small></span></div>
             <div><b>✓</b><span><strong>Achieve more</strong><small>Track progress and improve every day</small></span></div>
           </div>
         </div>
-        <p className="kivuCopyright">© 2026 EDUKA</p>
+        <p className="edukaCopyright">© 2026 EDUKA</p>
       </section>
 
-      <section className="kivuAuthPanel">
-        <div className="kivuAuthInner">
-          <div className="kivuMobileLogo">✦ EDUKA</div>
-          <span className="kivuEyebrow">CREATE YOUR ACCOUNT</span>
+      <section className="edukaAuthPanel">
+        <div className="edukaAuthInner">
+          <div className="edukaMobileLogo">✦ EDUKA</div>
+          <span className="edukaEyebrow">CREATE YOUR ACCOUNT</span>
           <h1>Welcome to EDUKA</h1>
-          <p className="kivuLead">Create your account and start exploring what you can do.</p>
+          <p className="edukaLead">Create your account and start exploring what you can do.</p>
 
-          <form onSubmit={submit} className="kivuForm">
+          <form onSubmit={submit} className="edukaForm">
             <label>
               <span>Full name</span>
               <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Enter your name" autoComplete="name" />
@@ -75,14 +75,14 @@ export default function SignUp() {
               <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters" autoComplete="new-password" minLength={8} required />
             </label>
 
-            {error && <div className="kivuFormError">{error}</div>}
+            {error && <div className="edukaFormError">{error}</div>}
 
-            <button className="kivuPrimaryButton" type="submit" disabled={loading}>
+            <button className="edukaPrimaryButton" type="submit" disabled={loading}>
               {loading ? "Creating your account..." : "Create account"} <span>→</span>
             </button>
           </form>
 
-          <p className="kivuSwitch">Already have an account? <Link href="/login">Sign in</Link></p>
+          <p className="edukaSwitch">Already have an account? <Link href="/login">Sign in</Link></p>
         </div>
       </section>
     </main>
