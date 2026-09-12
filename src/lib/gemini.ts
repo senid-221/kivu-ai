@@ -191,6 +191,10 @@ export async function uploadGeminiFile(
   const uploadUrl = start.headers.get("x-goog-upload-url");
   if (!uploadUrl) throw new Error("Gemini did not return a file upload URL.");
 
+  // Make a fresh ArrayBuffer so TypeScript and the Fetch API agree on BodyInit.
+  // Uint8Array<ArrayBufferLike> can otherwise fail Next.js production type checks.
+  const uploadBody = new Uint8Array(bytes).buffer;
+
   const uploaded = await fetch(uploadUrl, {
     method: "POST",
     headers: {
@@ -198,7 +202,7 @@ export async function uploadGeminiFile(
       "X-Goog-Upload-Command": "upload, finalize",
       "Content-Type": mimeType,
     },
-    body: bytes,
+    body: uploadBody,
   });
 
   const data = await uploaded.json().catch(() => ({}));
