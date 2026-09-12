@@ -9,7 +9,7 @@ const models: Record<string, { name: string; subtitle: string; greeting: string 
   developer: { name: "Developer", subtitle: "Build websites, apps and digital products", greeting: "What would you like to build?" },
   student: { name: "Student", subtitle: "Study, revise and understand deeply", greeting: "What are we studying today?" },
   seller: { name: "Seller", subtitle: "Business, sales and growth guidance", greeting: "What would you like to improve?" },
-  nesa_exam_rev: { name: "NESA Exam", subtitle: "Exam revision with detailed explanations", greeting: "Upload an exam or ask a revision question." },
+  nesa_exam_rev: { name: "NESA Exam", subtitle: "Past papers, exam practice and detailed explanations", greeting: "Ask a revision question or create a past-paper-informed practice quiz." },
 };
 
 function cleanDisplayedAiText(value: string) {
@@ -143,7 +143,7 @@ function ChatContent() {
         <p>Ask a question, upload a PDF, document, exam paper or image, and let EDUKA analyze it with you.</p>
         <div className="agentPromptGrid">
           <button onClick={() => setInput("Explain this topic step by step")}>Explain a topic</button>
-          <button onClick={() => setInput("Give me an example and test my understanding")}>Practice with me</button>
+          <button onClick={() => setInput(modelId === "nesa_exam_rev" ? "Create a NESA practice quiz using past-paper style questions for my level and subject" : "Give me an example and test my understanding")}>{modelId === "nesa_exam_rev" ? "NESA practice quiz" : "Practice with me"}</button>
           <button onClick={() => fileInput.current?.click()}><Paperclip size={15} /> Analyze a file</button>
         </div>
       </div> : messages.map((m, i) => <div className={"agentMessage " + m.role} key={i}>
