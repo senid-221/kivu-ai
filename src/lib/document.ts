@@ -4,10 +4,71 @@ export type ExtractedDocument = {
   text: string;
   pages?: number;
   truncated?: boolean;
+  scanned?: boolean;
 };
 
 function clean(text: string) {
   return text.replace(/\u0000/g, "").replace(/\s+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+async function ocrImage(image: Buffer) {
+  const { createWorker } = await import("tesseract.js");
+  const worker = await createWorker("eng");
+  try {
+    const result = await worker.recognize(image);
+    return clean(result.data.text || "");
+  } finally {
+    await worker.terminate();
+  }
+}
+
+async function extractPdf(buffer: Buffer): Promise<ExtractedDocument> {
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const task = pdfjs.getDocument({
+    data: new Uint8Array(buffer),
+    useSystemFonts: true,
+    disableFontFace: true,
+    isEvalSupported: false,
+  });
+
+  const pdf = await task.promise;
+  const chunks: string[] = [];
+  const maxPages = Math.min(pdf.numPages, 25);
+  let scanned = false;
+
+  for (let pageNumber = 1; pageNumber <= maxPages; pageNumber++) {
+    const page = await pdf.getPage(pageNumber);
+    const content = await page.getTextContent();
+    const pageText = clean((content.items as Array<{ str?: string }>).map((item) => item.str || "").join(" "));
+
+    if (pageText.length >= 20) {
+      chunks.push("[Page " + pageNumber + "]\n" + pageText);
+    } else {
+      scanned = true;
+      try {
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvasModule = await import("@napi-rs/canvas");
+        const canvas = canvasModule.createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
+        const context = canvas.getContext("2d");
+        await page.render({ canvasContext: context as never, viewport }).promise;
+        const image = canvas.toBuffer("image/png");
+        const text = await ocrImage(image);
+        if (text) chunks.push("[Page " + pageNumber + " — OCR]\n" + text);
+      } catch {
+        chunks.push("[Page " + pageNumber + " appears to be a scanned image. OCR could not read this page clearly.]");
+      }
+    }
+    page.cleanup();
+  }
+
+  const pages = pdf.numPages;
+  await pdf.cleanup();
+  return {
+    text: clean(chunks.join("\n\n")),
+    pages,
+    truncated: pages > maxPages,
+    scanned,
+  };
 }
 
 export async function extractDocumentText(buffer: Buffer, name: string, type: string): Promise<ExtractedDocument> {
@@ -27,33 +88,11 @@ export async function extractDocumentText(buffer: Buffer, name: string, type: st
   }
 
   if (lower.endsWith(".pdf") || type === "application/pdf") {
-    // Dynamic import keeps PDF.js out of routes that do not process PDFs.
-    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    const task = pdfjs.getDocument({
-      data: new Uint8Array(buffer),
-      useSystemFonts: true,
-      disableFontFace: true,
-      isEvalSupported: false,
-    });
+    return extractPdf(buffer);
+  }
 
-    const pdf = await task.promise;
-    const chunks: string[] = [];
-    const maxPages = Math.min(pdf.numPages, 40);
-
-    for (let pageNumber = 1; pageNumber <= maxPages; pageNumber++) {
-      const page = await pdf.getPage(pageNumber);
-      const content = await page.getTextContent();
-      const pageText = (content.items as Array<{ str?: string }>).map((item) => item.str || "").join(" ");
-      if (pageText.trim()) chunks.push("[Page " + pageNumber + "]\n" + pageText);
-      page.cleanup();
-    }
-
-    await pdf.cleanup();
-    return {
-      text: clean(chunks.join("\n\n")),
-      pages: pdf.numPages,
-      truncated: pdf.numPages > maxPages,
-    };
+  if (type.startsWith("image/") || /\.(png|jpe?g|webp)$/i.test(lower)) {
+    return { text: await ocrImage(buffer), scanned: true };
   }
 
   throw new Error("Unsupported file format.");
