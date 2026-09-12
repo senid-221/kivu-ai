@@ -116,8 +116,12 @@ function ChatContent() {
           : "KIVU AI could not complete this request right now. Please try again later.");
       const final = [...next, { role: "assistant", content: reply }];
       setMessages(final); await persist(final);
-    } catch {
-      setMessages([...next, { role: "assistant", content: "Unable to analyze this file right now. Please try again." }]);
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "KIVU AI could not complete this request right now. Please try again.";
+      setMessages([...next, { role: "assistant", content: message }]);
     } finally { setLoading(false); setActivity([]); }
   }
 
