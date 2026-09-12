@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readSession } from "@/lib/auth";
-import { generateGemini, GeminiPart } from "@/lib/gemini";
+import { generateGemini, GeminiPart, uploadGeminiFile } from "@/lib/gemini";
 import mammoth from "mammoth";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024;
+const MAX_FILE_SIZE = 45 * 1024 * 1024;
+const INLINE_PDF_LIMIT = 8 * 1024 * 1024;
 
 async function requireUser(req: NextRequest) {
   const token = req.cookies.get("kivu_session")?.value;
@@ -51,7 +52,7 @@ function mimeTypeFor(file: File) {
 }
 
 const MATERIAL_PROMPT =
-  "You are KIVU AI. Carefully inspect the uploaded material and extract the information that will help answer questions accurately. Preserve important facts, questions, tables, headings and instructions. For exam papers, identify questions clearly. For images and scanned documents, describe and transcribe useful visible content. Return clean, well-structured text.";
+  "You are KIVU AI's document reader. Read the uploaded material completely and accurately before answering. For PDFs, use native document understanding: inspect both selectable text and every visible page, including scanned pages, photos, tables, diagrams, charts and exam questions. Do not say a file cannot be read unless the file itself is corrupted or unreadable. Extract the important content faithfully, preserve headings and question numbering, and clearly identify questions, answers and instructions in exam papers. Return clean plain text without Markdown symbols.";
 
 async function analyze(parts: GeminiPart[]) {
   return generateGemini({
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: "Maximum file size is 20 MB." }, { status: 400 });
+      return NextResponse.json({ error: "Maximum file size is 45 MB." }, { status: 400 });
     }
 
     const name = file.name;
@@ -102,11 +103,51 @@ export async function POST(req: NextRequest) {
       result = await analyze([
         { text: "FILE: " + name + "\n\nCONTENT:\n" + raw.slice(0, 180000) },
       ]);
-    } else if (isPdf(type, name) || isImage(type, name)) {
+    } else if (isPdf(type, name)) {
       const bytes = Buffer.from(await file.arrayBuffer());
 
+      // Small PDFs are sent directly. Larger PDFs use Gemini's Files API,
+      // which is more reliable and avoids oversized base64 JSON requests.
+      if (bytes.byteLength > INLINE_PDF_LIMIT) {
+        try {
+          const uploaded = await uploadGeminiFile(bytes, "application/pdf", name);
+          result = await analyze([
+            { text: "Read and analyze this PDF completely: " + name },
+            {
+              fileData: {
+                mimeType: uploaded.mimeType,
+                fileUri: uploaded.uri,
+              },
+            },
+          ]);
+        } catch (uploadError) {
+          // Fall back to inline data when temporary file upload is unavailable.
+          console.warn("Gemini Files upload failed; trying inline PDF:", uploadError);
+          result = await analyze([
+            { text: "Read and analyze this PDF completely, including scanned pages: " + name },
+            {
+              inlineData: {
+                mimeType: "application/pdf",
+                data: bytes.toString("base64"),
+              },
+            },
+          ]);
+        }
+      } else {
+        result = await analyze([
+          { text: "Read and analyze this PDF completely, including scanned pages: " + name },
+          {
+            inlineData: {
+              mimeType: "application/pdf",
+              data: bytes.toString("base64"),
+            },
+          },
+        ]);
+      }
+    } else if (isImage(type, name)) {
+      const bytes = Buffer.from(await file.arrayBuffer());
       result = await analyze([
-        { text: "Analyze this uploaded file: " + name },
+        { text: "Read and analyze all useful visible content in this image: " + name },
         {
           inlineData: {
             mimeType: type,
