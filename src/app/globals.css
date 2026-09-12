@@ -79,3 +79,27 @@ form{max-width:860px}.shell form>div,.shell form>label{display:grid;gap:8px;marg
   .studentInputRow{align-items:stretch}
   .studentStart{min-width:76px}
 }
+
+
+/* Final compact cleanup */
+.studentStudy label{display:block;margin:0 0 10px;font-size:14px;font-weight:850;color:#26354c}
+.studentStart{text-decoration:none;white-space:nowrap}
+@media(max-width:540px){
+  .mobileAppHeader{padding:0 14px}
+  .mobileAppHeader a:first-child{font-size:16px}
+  .bottomNav{height:64px}
+  .bottomNav a{font-size:16px}
+  .bottomNav small{font-size:9px}
+  .studentPage{max-width:100%;padding:22px 14px 88px}
+  .studentIntro h1{font-size:32px}
+  .studentIntro p{margin-top:10px}
+  .studentModes{overflow-x:auto;flex-wrap:nowrap;padding-bottom:3px;margin:20px 0 25px}
+  .studentMode{white-space:nowrap;margin-right:13px}
+  .studentInputRow{display:grid;grid-template-columns:1fr auto;gap:8px}
+  .studentInputRow input{height:48px;font-size:16px}
+  .studentStart{min-height:48px;padding:0 16px}
+}
+@media(max-width:360px){
+  .studentInputRow{grid-template-columns:1fr}
+  .studentStart{width:100%}
+}
