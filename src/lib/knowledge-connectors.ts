@@ -93,6 +93,37 @@ const PROVIDERS: Record<KnowledgeMode, Provider[]> = {
   ]
 };
 
+export type RwandaEducationLevel = "primary" | "ordinary_level" | "advanced_level" | "general";
+
+const LEVEL_TERMS: Record<Exclude<RwandaEducationLevel, "general">, string[]> = {
+  primary: ["primary", "p1", "p2", "p3", "p4", "p5", "p6", "primary school"],
+  ordinary_level: ["ordinary level", "o level", "o-level", "s1", "s2", "s3", "senior 1", "senior 2", "senior 3"],
+  advanced_level: ["advanced level", "a level", "a-level", "s4", "s5", "s6", "senior 4", "senior 5", "senior 6"]
+};
+
+export function detectRwandaEducationLevel(query: string): RwandaEducationLevel {
+  const lower = query.toLowerCase();
+  for (const [level, words] of Object.entries(LEVEL_TERMS) as [Exclude<RwandaEducationLevel, "general">, string[]][]) {
+    if (words.some(word => lower.includes(word))) return level;
+  }
+  return "general";
+}
+
+const RWANDA_CURRICULUM_SUBJECTS: Record<RwandaEducationLevel, string[]> = {
+  primary: ["English", "Kinyarwanda", "Mathematics", "Science and Elementary Technology", "Social and Religious Studies", "Creative Arts"],
+  ordinary_level: ["Mathematics", "Physics", "Chemistry", "Biology", "English", "Kinyarwanda", "History", "Geography", "Computer Science"],
+  advanced_level: ["Mathematics", "Physics", "Chemistry", "Biology", "Computer Science", "History", "Geography", "English"],
+  general: []
+};
+
+function buildCurriculumQuery(query: string, subject: AcademicSubject, level: RwandaEducationLevel) {
+  const levelLabel = level === "primary" ? "Rwanda primary curriculum" :
+    level === "ordinary_level" ? "Rwanda ordinary level curriculum" :
+    level === "advanced_level" ? "Rwanda advanced level curriculum" : "Rwanda curriculum";
+  const subjectLabel = subject === "general" ? "" : subject.replace("_", " ");
+  return [levelLabel, subjectLabel, query].filter(Boolean).join(" ");
+}
+
 const SUBJECT_SOURCE_MAP: Record<AcademicSubject, Partial<Record<KnowledgeMode, string[]>>> = {
   physics: {
     student: ["REB E-Learning", "OpenStax", "MIT OpenCourseWare"],
@@ -351,8 +382,9 @@ async function retrieveSourceContent(source: KnowledgeSource, query: string) {
 
 export async function retrieveKnowledge(mode: KnowledgeMode, query: string): Promise<KnowledgeSource[]> {
   const subject = detectSubject(query);
+  const level = detectRwandaEducationLevel(query);
   const providers = providersForSubject(mode, subject);
-  const subjectQuery = buildSubjectQuery(query, subject);
+  const subjectQuery = buildCurriculumQuery(query, subject, level);
   const groups = await Promise.all(providers.map(provider => searchProvider(provider, subjectQuery)));
   // Keep a wider candidate pool before enrichment so subject-specific evidence can win.
   const sources = groups.flat().slice(0, 12);
