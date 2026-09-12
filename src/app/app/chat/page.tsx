@@ -146,11 +146,13 @@ function ChatContent() {
           ? "Baza ikibazo cy'isomo cyangwa shyiraho PDF, inyandiko cyangwa ifoto. EDUKA irayisesengura ikagufasha gusobanukirwa neza."
           : modelId === "seller"
           ? "Sobanura ubucuruzi bwawe cyangwa ikibazo ufite. EDUKA iragufasha mu kugurisha, kwamamaza, ibiciro no kubona abakiriya."
+          : modelId === "nesa_exam_rev"
+          ? "Ohereza cyangwa andika ikibazo cyo mu kizamini. EDUKA iragufasha kubona igisubizo, ibisobanuro n’uburyo bwo kugisubiramo."
           : "Baza ikibazo cyangwa shyiraho PDF, inyandiko, ikizamini cyangwa ifoto. EDUKA irayisesengura ikagufasha kuyisobanukirwa."}</p>
         <div className="agentPromptGrid">
-          <button onClick={() => setInput(modelId === "developer" ? "Mfasha kubaka website igezweho" : modelId === "seller" ? "Mfasha kongera ibyo ngurisha" : "Sobanura iki gice intambwe ku yindi")}>{modelId === "developer" ? "Kubaka website" : modelId === "seller" ? "Kongera ibyo ngurisha" : "Sobanura isomo"}</button>
+          <button onClick={() => setInput(modelId === "developer" ? "Mfasha kubaka website igezweho" : modelId === "seller" ? "Mfasha kongera ibyo ngurisha" : modelId === "nesa_exam_rev" ? "Sobanura iki kibazo cyo mu kizamini" : "Sobanura iki gice intambwe ku yindi")}>{modelId === "developer" ? "Kubaka website" : modelId === "seller" ? "Kongera ibyo ngurisha" : modelId === "nesa_exam_rev" ? "Sobanura ikibazo" : "Sobanura isomo"}</button>
           <button onClick={() => setInput(modelId === "nesa_exam_rev" ? "Nkorera imyitozo ya NESA ishingiye ku bibazo byabanje, ijyanye n'urwego n'isomo ryanjye" : modelId === "developer" ? "Mfasha gukosora code yanjye" : modelId === "seller" ? "Mfasha kunoza uburyo bwo kwamamaza" : "Mpa urugero hanyuma ungerageze kureba niba nasobanukiwe")}>{modelId === "nesa_exam_rev" ? "Imyitozo ya NESA" : modelId === "developer" ? "Gukosora code" : modelId === "seller" ? "Kwamamaza" : "Imenyereze"}</button>
-          <button onClick={() => fileInput.current?.click()}><Paperclip size={15} /> {modelId === "developer" ? "Soma code cyangwa inyandiko" : modelId === "seller" ? "Soma inyandiko y'ubucuruzi" : "Soma inyandiko"}</button>
+          <button onClick={() => fileInput.current?.click()}><Paperclip size={15} /> {modelId === "developer" ? "Soma code cyangwa inyandiko" : modelId === "seller" ? "Soma inyandiko y'ubucuruzi" : modelId === "nesa_exam_rev" ? "Ohereza ikibazo cy'ikizamini" : "Soma inyandiko"}</button>
         </div>
       </div> : messages.map((m, i) => <div className={"agentMessage " + m.role} key={i}>
         {m.role === "assistant" && <div className="messageAvatar"><GraduationCap size={15} /></div>}
