@@ -28,6 +28,7 @@ const PROVIDERS: Record<KnowledgeMode, Provider[]> = {
     { name: "OpenStax", hosts: ["openstax.org"], searchUrls: () => ["https://openstax.org/subjects"], match: /openstax\.org\//i }
   ],
   nesa_exam_rev: [
+    { name: "NESA Official Resources", hosts: ["nesa.gov.rw", "www.nesa.gov.rw"], searchUrls: q => ["https://www.nesa.gov.rw/1/resources"], match: /resources|national-exam|model-questions|fileadmin|uploads|pdf/i },
     { name: "REB E-Learning", hosts: ["elearning.reb.rw"], searchUrls: q => ["https://elearning.reb.rw/local/reblibrary/index.php?search=" + encodeURIComponent(q)], match: /pluginfile\.php|resource|course\/view|reblibrary|mod\/resource/i }
   ],
   developer: [
@@ -51,6 +52,11 @@ function stripHtml(value: string) {
     .replace(/&amp;/g, "&")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function looksLikeExamPaper(title: string, url: string, query: string) {
+  const text = (title + " " + url + " " + query).toLowerCase();
+  return /past paper|exam|examination|mock|model question|question paper|marking guide|assessment/.test(text);
 }
 
 async function searchProvider(provider: Provider, query: string): Promise<KnowledgeSource[]> {
@@ -82,6 +88,7 @@ async function searchProvider(provider: Provider, query: string): Promise<Knowle
 
         if (!provider.hosts.some(host => parsed.hostname === host || parsed.hostname.endsWith("." + host))) continue;
         if (!provider.match.test(url)) continue;
+        if (provider.name.includes("NESA") && !looksLikeExamPaper(title, url, query)) continue;
         if (results.some(item => item.url === url)) continue;
 
         results.push({
@@ -219,7 +226,16 @@ export async function retrieveKnowledge(mode: KnowledgeMode, query: string): Pro
 
   // Second RAG stage: retrieve readable HTML and public PDF textbook content.
   // Only excerpts relevant to the student's question are passed to the model.
-  return Promise.all(sources.map((source) => retrieveSourceContent(source, query)));
+  const enriched = await Promise.all(sources.map((source) => retrieveSourceContent(source, query)));
+
+  // For exam revision, rank actual exam-oriented evidence before general resources.
+  if (mode === "nesa_exam_rev") {
+    return enriched
+      .sort((a, b) => Number(looksLikeExamPaper(b.title, b.url, query)) - Number(looksLikeExamPaper(a.title, a.url, query)))
+      .slice(0, 6);
+  }
+
+  return enriched;
 }
 
 export function knowledgePrompt(mode: KnowledgeMode, sources: KnowledgeSource[]) {
