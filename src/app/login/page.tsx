@@ -27,7 +27,7 @@ export default function Login() {
       return;
     }
 
-    router.push("/app");
+    router.replace("/app/chat");
   }
 
   return (
