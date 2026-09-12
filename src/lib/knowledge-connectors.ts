@@ -8,6 +8,40 @@ export type KnowledgeSource = {
   excerpts?: string[];
 };
 
+
+type AcademicSubject =
+  | "physics" | "chemistry" | "biology" | "mathematics"
+  | "computer_science" | "english" | "history" | "geography" | "general";
+
+const SUBJECT_TERMS: Record<Exclude<AcademicSubject, "general">, string[]> = {
+  physics: ["physics", "force", "motion", "energy", "electric", "electricity", "wave", "pressure", "velocity", "acceleration", "momentum", "formula"],
+  chemistry: ["chemistry", "chemical", "atom", "molecule", "reaction", "acid", "base", "compound", "element"],
+  biology: ["biology", "cell", "organism", "photosynthesis", "genetics", "ecology", "respiration"],
+  mathematics: ["mathematics", "math", "algebra", "geometry", "calculus", "equation", "number", "theorem"],
+  computer_science: ["computer science", "programming", "algorithm", "software", "coding", "javascript", "python"],
+  english: ["english", "grammar", "literature", "writing", "language"],
+  history: ["history", "historical", "colonial", "kingdom", "war", "independence"],
+  geography: ["geography", "climate", "map", "population", "environment", "landform"]
+};
+
+function detectSubject(query: string): AcademicSubject {
+  const lower = query.toLowerCase();
+  let best: AcademicSubject = "general";
+  let bestScore = 0;
+  for (const [subject, words] of Object.entries(SUBJECT_TERMS) as [Exclude<AcademicSubject, "general">, string[]][]) {
+    const hits = words.reduce((n, word) => n + (lower.includes(word) ? 1 : 0), 0);
+    if (hits > bestScore) { best = subject; bestScore = hits; }
+  }
+  return best;
+}
+
+function subjectMatchesSource(source: KnowledgeSource, subject: AcademicSubject) {
+  if (subject === "general") return true;
+  const text = [source.title, source.snippet, ...(source.excerpts || [])].join(" ").toLowerCase();
+  const words = SUBJECT_TERMS[subject];
+  return words.some(word => text.includes(word));
+}
+
 type Provider = {
   name: string;
   hosts: string[];
@@ -258,23 +292,34 @@ async function retrieveSourceContent(source: KnowledgeSource, query: string) {
 }
 
 export async function retrieveKnowledge(mode: KnowledgeMode, query: string): Promise<KnowledgeSource[]> {
+  const subject = detectSubject(query);
   const providers = PROVIDERS[mode] || [];
   const groups = await Promise.all(providers.map(provider => searchProvider(provider, query)));
-  const sources = groups.flat().slice(0, 6);
+  // Keep a wider candidate pool before enrichment so subject-specific evidence can win.
+  const sources = groups.flat().slice(0, 12);
 
   // Second RAG stage: retrieve readable HTML and public PDF textbook content.
   // Only excerpts relevant to the student's question are passed to the model.
   const enriched = await Promise.all(sources.map((source) => retrieveSourceContent(source, query)));
 
   // For exam revision, rank actual exam-oriented evidence before general resources.
+  const subjectAware = enriched.filter(source => subjectMatchesSource(source, subject));
+  const candidates = subjectAware.length ? subjectAware : enriched;
+
   if (mode === "nesa_exam_rev") {
-    return enriched
+    return candidates
       .filter(source => !isGenericNesaGuideline(source.title, source.url))
-      .sort((a, b) => Number(sourceMatchesQuestion(b, query)) - Number(sourceMatchesQuestion(a, query)))
+      .sort((a, b) => {
+        const evidenceDiff = Number(sourceMatchesQuestion(b, query)) - Number(sourceMatchesQuestion(a, query));
+        if (evidenceDiff !== 0) return evidenceDiff;
+        return Number(subjectMatchesSource(b, subject)) - Number(subjectMatchesSource(a, subject));
+      })
       .slice(0, 6);
   }
 
-  return enriched;
+  return candidates
+    .sort((a, b) => Number(sourceMatchesQuestion(b, query)) - Number(sourceMatchesQuestion(a, query)))
+    .slice(0, 6);
 }
 
 export function knowledgePrompt(mode: KnowledgeMode, sources: KnowledgeSource[], query = "") {
