@@ -23,6 +23,8 @@ async function ocrImage(image: Buffer) {
 }
 
 async function extractPdf(buffer: Buffer): Promise<ExtractedDocument> {
+  // Text-only extraction keeps this route compatible with server bundlers.
+  // OCR for scanned PDFs can be added later through a separate worker/service.
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
   const task = pdfjs.getDocument({
     data: new Uint8Array(buffer),
@@ -30,7 +32,6 @@ async function extractPdf(buffer: Buffer): Promise<ExtractedDocument> {
     disableFontFace: true,
     isEvalSupported: false,
   });
-
   const pdf = await task.promise;
   const chunks: string[] = [];
   const maxPages = Math.min(pdf.numPages, 25);
@@ -40,35 +41,17 @@ async function extractPdf(buffer: Buffer): Promise<ExtractedDocument> {
     const page = await pdf.getPage(pageNumber);
     const content = await page.getTextContent();
     const pageText = clean((content.items as Array<{ str?: string }>).map((item) => item.str || "").join(" "));
-
-    if (pageText.length >= 20) {
-      chunks.push("[Page " + pageNumber + "]\n" + pageText);
-    } else {
+    if (pageText.length >= 20) chunks.push("[Page " + pageNumber + "]\n" + pageText);
+    else {
       scanned = true;
-      try {
-        const viewport = page.getViewport({ scale: 1.5 });
-        const canvasModule = await import("@napi-rs/canvas");
-        const canvas = canvasModule.createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
-        const context = canvas.getContext("2d");
-        await page.render({ canvasContext: context as never, viewport }).promise;
-        const image = canvas.toBuffer("image/png");
-        const text = await ocrImage(image);
-        if (text) chunks.push("[Page " + pageNumber + " — OCR]\n" + text);
-      } catch {
-        chunks.push("[Page " + pageNumber + " appears to be a scanned image. OCR could not read this page clearly.]");
-      }
+      chunks.push("[Page " + pageNumber + " appears to be scanned. Text extraction was not available for this page.]");
     }
     page.cleanup();
   }
 
   const pages = pdf.numPages;
   await pdf.cleanup();
-  return {
-    text: clean(chunks.join("\n\n")),
-    pages,
-    truncated: pages > maxPages,
-    scanned,
-  };
+  return { text: clean(chunks.join("\n\n")), pages, truncated: pages > maxPages, scanned };
 }
 
 export async function extractDocumentText(buffer: Buffer, name: string, type: string): Promise<ExtractedDocument> {
