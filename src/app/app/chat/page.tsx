@@ -142,6 +142,8 @@ function ChatContent() {
         <h1>{model.greeting}</h1>
         <p>{modelId === "developer"
           ? "Sobanura website, application cyangwa system ushaka kubaka. EDUKA iragufasha gutegura, kwandika no gukosora code."
+          : modelId === "student"
+          ? "Baza ikibazo cy'isomo cyangwa shyiraho PDF, inyandiko cyangwa ifoto. EDUKA irayisesengura ikagufasha gusobanukirwa neza."
           : "Baza ikibazo cyangwa shyiraho PDF, inyandiko, ikizamini cyangwa ifoto. EDUKA irayisesengura ikagufasha kuyisobanukirwa."}</p>
         <div className="agentPromptGrid">
           <button onClick={() => setInput(modelId === "developer" ? "Mfasha kubaka website igezweho" : "Sobanura iki gice intambwe ku yindi")}>{modelId === "developer" ? "Kubaka website" : "Sobanura isomo"}</button>
