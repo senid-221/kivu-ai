@@ -1,10 +1,11 @@
 import Link from "next/link";
+import { GraduationCap } from "lucide-react";
 
 export default function Home() {
   return (
     <main className="landing">
       <nav>
-        <b>✦ Eduka</b>
+        <b className="landingBrand"><GraduationCap size={22} /> Eduka</b>
         <div>
           <Link href="/login">Sign in</Link>
           <Link className="button" href="/signup">Get started</Link>
@@ -12,7 +13,7 @@ export default function Home() {
       </nav>
 
       <section>
-        <span>✦ Your intelligent learning companion</span>
+        <span className="landingEyebrow"><GraduationCap size={18} /> Your intelligent learning companion</span>
         <h1>Learn. Build.<br /><em>Grow.</em></h1>
         <p>
           Eduka helps students, teachers, developers and entrepreneurs learn
