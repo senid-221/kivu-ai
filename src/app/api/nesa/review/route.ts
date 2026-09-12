@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       };
     }
 
-    return NextResponse.json({ ...review, model: result.model });
+    return NextResponse.json({ ...review, model: result.model, sources: sources.map((source) => ({ title: source.title, url: source.url, provider: source.provider, usedAsEvidence: Boolean(source.excerpts?.length) })) });
   } catch (error) {
     return NextResponse.json(
       {
