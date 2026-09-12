@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { GraduationCap, History, LayoutDashboard, MessageSquarePlus, Upload, UserRound, BarChart3 } from "lucide-react";
+import { GraduationCap, History, LayoutDashboard, MessageSquarePlus, UserRound, BarChart3 } from "lucide-react";
 
 export default function AppLayout({children}:{children:React.ReactNode}){
  const nav=[
   {icon:<MessageSquarePlus size={18}/>,label:"New chat",href:"/app/chat"},
   {icon:<History size={18}/>,label:"History",href:"/app/history"},
   {icon:<BarChart3 size={18}/>,label:"Progress",href:"/app/progress"},
-  {icon:<Upload size={18}/>,label:"Materials",href:"/app/upload"},
  ];
  return <div className="edukaApp agentShell">
    <aside className="appSidebar agentSidebar">
@@ -30,7 +29,6 @@ export default function AppLayout({children}:{children:React.ReactNode}){
    <nav className="bottomNav">
     <Link href="/app/chat"><MessageSquarePlus size={19}/><small>Chat</small></Link>
     <Link href="/app/history"><History size={19}/><small>History</small></Link>
-    <Link href="/app/upload"><Upload size={19}/><small>Files</small></Link>
     <Link href="/app/profile"><UserRound size={19}/><small>Profile</small></Link>
    </nav>
  </div>
