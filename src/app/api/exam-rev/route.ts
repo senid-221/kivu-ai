@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ id: review.id, ...reviewData, model: result.model });
+    return NextResponse.json({ id: review.id, ...reviewData, model: result.model, sources: sources.map((source) => ({ title: source.title, url: source.url, provider: source.provider, usedAsEvidence: Boolean(source.excerpts?.length) })) });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unable to review this exam question.";
