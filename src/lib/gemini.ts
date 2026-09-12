@@ -106,6 +106,28 @@ function extractText(data: any) {
     .trim();
 }
 
+/**
+ * KIVU AI displays clean plain text. Gemini may return Markdown such as
+ * **bold**, *italic*, headings and asterisk bullets; remove those markers
+ * before the response reaches the UI.
+ */
+export function cleanAiText(value: string) {
+  return value
+    .replace(/\r\n/g, "\n")
+    // Markdown code fences: keep the code, remove the fence markers.
+    .replace(/^\s*```[^\n]*\n?/gm, "")
+    .replace(/^\s*```\s*$/gm, "")
+    // Markdown headings.
+    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+    // Asterisk bullets become a clean dash.
+    .replace(/^\s*[*•]\s+/gm, "- ")
+    // Bold / italic / stray Markdown emphasis markers.
+    .replace(/\*{1,3}/g, "")
+    // Remove empty lines created by formatting cleanup.
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function providerError(status: number, data: any) {
   const message =
     typeof data?.error?.message === "string"
@@ -193,7 +215,7 @@ export async function generateGemini(request: GeminiRequest) {
     );
   }
 
-  return { text, model: result.model };
+  return { text: cleanAiText(text), model: result.model };
 }
 
 export async function getAvailableGeminiModels() {
