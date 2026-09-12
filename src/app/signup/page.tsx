@@ -40,10 +40,10 @@ export default function SignUp() {
   return (
     <main className="kivuAuth">
       <section className="kivuAuthVisual">
-        <Link href="/" className="kivuLogo"><span>✦</span> KIVU AI</Link>
+        <Link href="/" className="kivuLogo"><span>✦</span> EDUKA</Link>
         <div className="kivuVisualCopy">
-          <span className="kivuEyebrow">INTELLIGENCE FOR EVERYONE</span>
-          <h2>Build your future with <em>AI.</em></h2>
+          <span className="kivuEyebrow">LEARNING FOR EVERYONE</span>
+          <h2>Build your future through <em>AI.</em></h2>
           <p>Learn, create, revise and grow with intelligent tools designed around you.</p>
           <div className="kivuFeatureList">
             <div><b>✦</b><span><strong>Learn faster</strong><small>Study with your personal AI teacher</small></span></div>
@@ -51,14 +51,14 @@ export default function SignUp() {
             <div><b>✓</b><span><strong>Achieve more</strong><small>Track progress and improve every day</small></span></div>
           </div>
         </div>
-        <p className="kivuCopyright">© 2026 KIVU AI</p>
+        <p className="kivuCopyright">© 2026 EDUKA</p>
       </section>
 
       <section className="kivuAuthPanel">
         <div className="kivuAuthInner">
-          <div className="kivuMobileLogo">✦ KIVU AI</div>
+          <div className="kivuMobileLogo">✦ EDUKA</div>
           <span className="kivuEyebrow">CREATE YOUR ACCOUNT</span>
-          <h1>Welcome to KIVU AI</h1>
+          <h1>Welcome to EDUKA</h1>
           <p className="kivuLead">Create your account and start exploring what you can do.</p>
 
           <form onSubmit={submit} className="kivuForm">
