@@ -5,11 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { BrainCircuit, ChevronDown, FileText, GraduationCap, Image as ImageIcon, Loader2, Paperclip, Plus, Send, X } from "lucide-react";
 
 const models: Record<string, { name: string; subtitle: string; greeting: string }> = {
-  teacher: { name: "Mwarimu", subtitle: "Ibisobanuro byoroshye • Clear guidance", greeting: "Nakufasha iki kwiga uyu munsi?" },
+  teacher: { name: "Umwarimu", subtitle: "Ibisobanuro byoroshye • Ubuyobozi bwumvikana", greeting: "Ni iki nagufasha kwiga uyu munsi?" },
   developer: { name: "Developer", subtitle: "Build websites and apps • Byoroshye", greeting: "Ni iki ushaka kubaka?" },
   student: { name: "Umunyeshuri", subtitle: "Iga, subiramo kandi usobanukirwe", greeting: "Ni iki turi kwiga uyu munsi?" },
   seller: { name: "Ubucuruzi", subtitle: "Business, sales and growth guidance", greeting: "Ni iki ushaka kunoza?" },
-  nesa_exam_rev: { name: "NESA Isuzuma", subtitle: "Past papers, practice and clear explanations", greeting: "Baza ikibazo cyo gusubiramo cyangwa usabe imyitozo ishingiye ku bizamini byabanje." },
+  nesa_exam_rev: { name: "NESA Isuzuma", subtitle: "Ibizamini byabanje, imyitozo n’ibisobanuro byumvikana", greeting: "Baza ikibazo cyo gusubiramo cyangwa usabe imyitozo ishingiye ku bizamini byabanje." },
 };
 
 function cleanDisplayedAiText(value: string) {
@@ -143,7 +143,7 @@ function ChatContent() {
         <p>Baza ikibazo cyangwa shyiraho PDF, inyandiko, ikizamini cyangwa ifoto. EDUKA irayisesengura ikagufasha kuyisobanukirwa.</p>
         <div className="agentPromptGrid">
           <button onClick={() => setInput("Sobanura iki gice intambwe ku yindi")}>Sobanura isomo</button>
-          <button onClick={() => setInput(modelId === "nesa_exam_rev" ? "Nkorera imyitozo ya NESA ishingiye ku bibazo byabanje, ijyanye n'urwego n'isomo ryanjye" : "Mpa urugero hanyuma ungerageze kureba niba nasobanukiwe")}>{modelId === "nesa_exam_rev" ? "Imyitozo ya NESA" : "Nyimenyereze"}</button>
+          <button onClick={() => setInput(modelId === "nesa_exam_rev" ? "Nkorera imyitozo ya NESA ishingiye ku bibazo byabanje, ijyanye n'urwego n'isomo ryanjye" : "Mpa urugero hanyuma ungerageze kureba niba nasobanukiwe")}>{modelId === "nesa_exam_rev" ? "Imyitozo ya NESA" : "Imenyereze"}</button>
           <button onClick={() => fileInput.current?.click()}><Paperclip size={15} /> Soma inyandiko</button>
         </div>
       </div> : messages.map((m, i) => <div className={"agentMessage " + m.role} key={i}>
