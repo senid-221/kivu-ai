@@ -14,7 +14,7 @@ const SUBJECTS = [
 
 export async function POST(req: NextRequest) {
   try {
-    await requireAdmin(req.cookies.get("kivu_session")?.value);
+    await requireAdmin(req.cookies.get("eduka_session")?.value);
     const body = await req.json() as { mode?: KnowledgeMode; subjects?: string[]; level?: string };
     const mode = body.mode || "student";
     const selected = (body.subjects?.length ? body.subjects : SUBJECTS).filter(s => SUBJECTS.includes(s));
