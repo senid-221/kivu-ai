@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readSession } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { retrieveKnowledge, type KnowledgeMode } from "@/lib/knowledge-connectors";
 import { cacheKnowledgeSources } from "@/lib/knowledge-rag";
 
@@ -8,15 +8,13 @@ export const maxDuration = 60;
 
 const MODES: KnowledgeMode[] = ["teacher","student","nesa_exam_rev","developer","seller"];
 
-async function requireUser(req: NextRequest) {
-  const token = req.cookies.get("kivu_session")?.value;
-  if (!token) throw new Error("Unauthorized");
-  return readSession(token);
+async function requireAdminUser(req: NextRequest) {
+  return requireAdmin(req.cookies.get("kivu_session")?.value);
 }
 
 export async function GET(req: NextRequest) {
   try {
-    await requireUser(req);
+    await requireAdminUser(req);
     return NextResponse.json({ modes: MODES });
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -25,7 +23,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await requireUser(req);
+    await requireAdminUser(req);
     const body = await req.json() as { mode?: string; query?: string };
     const mode = MODES.includes(body.mode as KnowledgeMode)
       ? body.mode as KnowledgeMode
