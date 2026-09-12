@@ -145,24 +145,61 @@ function selectRelevantChunks(text: string, query: string) {
     .map((item) => item.chunk);
 }
 
+async function extractPdfText(bytes: ArrayBuffer) {
+  // Dynamic import keeps PDF.js out of the initial server bundle path.
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const document = await pdfjs.getDocument({
+    data: new Uint8Array(bytes),
+    useWorkerFetch: false,
+    isEvalSupported: false,
+    useSystemFonts: true,
+  }).promise;
+
+  const pages: string[] = [];
+  // A bounded number of pages protects the server from unexpectedly huge files.
+  const pageCount = Math.min(document.numPages, 120);
+
+  for (let pageNumber = 1; pageNumber <= pageCount; pageNumber++) {
+    const page = await document.getPage(pageNumber);
+    const content = await page.getTextContent();
+    const text = content.items
+      .map((item: any) => typeof item?.str === "string" ? item.str : "")
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (text) pages.push(text);
+  }
+
+  await document.destroy();
+  return pages.join("\n\n");
+}
+
 async function retrieveSourceContent(source: KnowledgeSource, query: string) {
   try {
-    const url = new URL(source.url);
-    // Only fetch normal HTML pages here. PDF files remain source links and can
-    // be opened/uploaded separately; this keeps the server build lightweight.
-    if (/\.pdf(?:$|\?)/i.test(url.pathname)) return source;
-
     const response = await fetch(source.url, {
       headers: {
         "User-Agent": "Mozilla/5.0 EDUKA Knowledge Retriever",
-        Accept: "text/html,application/xhtml+xml",
+        Accept: "application/pdf,text/html,application/xhtml+xml",
       },
       cache: "no-store",
-      signal: AbortSignal.timeout(9000),
+      signal: AbortSignal.timeout(15000),
     });
 
-    const type = response.headers.get("content-type") || "";
-    if (!response.ok || !type.includes("text/html")) return source;
+    if (!response.ok) return source;
+
+    const type = (response.headers.get("content-type") || "").toLowerCase();
+    const looksLikePdf = type.includes("application/pdf") || /\.pdf(?:$|\?)/i.test(new URL(source.url).pathname);
+
+    if (looksLikePdf) {
+      const bytes = await response.arrayBuffer();
+      const text = await extractPdfText(bytes);
+      const excerpts = selectRelevantChunks(text, query);
+      return excerpts.length
+        ? { ...source, snippet: "Official " + source.provider + " PDF learning resource", excerpts }
+        : source;
+    }
+
+    if (!type.includes("text/html")) return source;
 
     const html = await response.text();
     const text = normalizeText(html);
@@ -170,6 +207,7 @@ async function retrieveSourceContent(source: KnowledgeSource, query: string) {
 
     return excerpts.length ? { ...source, excerpts } : source;
   } catch {
+    // A single unreadable or protected PDF must never stop EDUKA from answering.
     return source;
   }
 }
@@ -179,7 +217,7 @@ export async function retrieveKnowledge(mode: KnowledgeMode, query: string): Pro
   const groups = await Promise.all(providers.map(provider => searchProvider(provider, query)));
   const sources = groups.flat().slice(0, 6);
 
-  // Second RAG stage: retrieve actual readable content from selected public pages.
+  // Second RAG stage: retrieve readable HTML and public PDF textbook content.
   // Only excerpts relevant to the student's question are passed to the model.
   return Promise.all(sources.map((source) => retrieveSourceContent(source, query)));
 }
