@@ -118,3 +118,32 @@ model StudyReminder {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+
+model KnowledgeDocument {
+  id          String           @id @default(cuid())
+  mode        String
+  provider    String
+  title       String
+  url         String           @unique
+  contentHash String?
+  status      String           @default("ready")
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  chunks      KnowledgeChunk[]
+
+  @@index([mode])
+  @@index([provider])
+}
+
+model KnowledgeChunk {
+  id         String            @id @default(cuid())
+  documentId String
+  document   KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunkIndex Int
+  content    String
+  createdAt  DateTime          @default(now())
+
+  @@unique([documentId, chunkIndex])
+  @@index([documentId])
+}
