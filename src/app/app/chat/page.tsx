@@ -5,11 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { BrainCircuit, ChevronDown, FileText, GraduationCap, Image as ImageIcon, Loader2, Paperclip, Plus, Send, X } from "lucide-react";
 
 const models: Record<string, { name: string; subtitle: string; greeting: string }> = {
-  teacher: { name: "Teacher", subtitle: "Clear explanations and practical guidance", greeting: "How can I help you learn today?" },
-  developer: { name: "Developer", subtitle: "Build websites, apps and digital products", greeting: "What would you like to build?" },
-  student: { name: "Student", subtitle: "Study, revise and understand deeply", greeting: "What are we studying today?" },
-  seller: { name: "Seller", subtitle: "Business, sales and growth guidance", greeting: "What would you like to improve?" },
-  nesa_exam_rev: { name: "NESA Exam", subtitle: "Past papers, exam practice and detailed explanations", greeting: "Ask a revision question or create a past-paper-informed practice quiz." },
+  teacher: { name: "Mwarimu", subtitle: "Ibisobanuro byoroshye • Clear guidance", greeting: "Nakufasha iki kwiga uyu munsi?" },
+  developer: { name: "Developer", subtitle: "Build websites and apps • Byoroshye", greeting: "Ni iki ushaka kubaka?" },
+  student: { name: "Umunyeshuri", subtitle: "Iga, subiramo kandi usobanukirwe", greeting: "Ni iki turi kwiga uyu munsi?" },
+  seller: { name: "Ubucuruzi", subtitle: "Business, sales and growth guidance", greeting: "Ni iki ushaka kunoza?" },
+  nesa_exam_rev: { name: "NESA Isuzuma", subtitle: "Past papers, practice and clear explanations", greeting: "Baza ikibazo cyo gusubiramo cyangwa usabe imyitozo ishingiye ku bizamini byabanje." },
 };
 
 function cleanDisplayedAiText(value: string) {
@@ -28,7 +28,7 @@ function ThinkingIndicator() {
   return (
     <div className="thinkingIndicator" role="status" aria-live="polite">
       <span className="thinkingIcon"><BrainCircuit size={18} /></span>
-      <span>Thinking</span>
+      <span>Ndimo gutekereza</span>
       <span className="thinkingDots" aria-hidden="true"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span>
     </div>
   );
@@ -108,7 +108,7 @@ function ChatContent() {
         if (data) images.push({ mediaType: file.type, data });
       }
 
-      const prompt = (text || "Please analyze this uploaded material.") + attachmentText;
+      const prompt = (text || "Sobanura kandi usesengure iki kintu nashyizemo.") + attachmentText;
       const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ modelId, message: prompt, images }) });
       const d = await r.json().catch(() => ({}));
       const reply = r.ok && typeof d.reply === "string"
@@ -129,9 +129,9 @@ function ChatContent() {
 
   return <main className="agentChat">
     <header className="agentHeader">
-      <div className="agentBrand"><span className="agentBrandMark"><BrainCircuit size={18} /></span><div><b>EDUKA</b><small>AI Agent workspace</small></div></div>
+      <div className="agentBrand"><span className="agentBrandMark"><BrainCircuit size={18} /></span><div><b>EDUKA</b><small>Ubufasha bw'ubwenge buhangano • AI workspace</small></div></div>
       <div className="agentHeaderTools">
-        <div className="agentModelWrap"><BrainCircuit size={14} /><select value={modelId} onChange={e => changeModel(e.target.value)} aria-label="Choose AI model">{Object.entries(models).map(([id, m]) => <option value={id} key={id}>{m.name}</option>)}</select><ChevronDown size={14} /></div>
+        <div className="agentModelWrap"><BrainCircuit size={14} /><select value={modelId} onChange={e => changeModel(e.target.value)} aria-label="Hitamo uburyo bwa AI">{Object.entries(models).map(([id, m]) => <option value={id} key={id}>{m.name}</option>)}</select><ChevronDown size={14} /></div>
       </div>
     </header>
 
@@ -140,11 +140,11 @@ function ChatContent() {
         <div className="agentWelcomeBadge"><GraduationCap size={24} /></div>
         <p className="agentEyebrow">EDUKA AGENT</p>
         <h1>{model.greeting}</h1>
-        <p>Ask a question, upload a PDF, document, exam paper or image, and let EDUKA analyze it with you.</p>
+        <p>Baza ikibazo cyangwa shyiraho PDF, inyandiko, ikizamini cyangwa ifoto. EDUKA irayisesengura ikagufasha kuyisobanukirwa.</p>
         <div className="agentPromptGrid">
-          <button onClick={() => setInput("Explain this topic step by step")}>Explain a topic</button>
-          <button onClick={() => setInput(modelId === "nesa_exam_rev" ? "Create a NESA practice quiz using past-paper style questions for my level and subject" : "Give me an example and test my understanding")}>{modelId === "nesa_exam_rev" ? "NESA practice quiz" : "Practice with me"}</button>
-          <button onClick={() => fileInput.current?.click()}><Paperclip size={15} /> Analyze a file</button>
+          <button onClick={() => setInput("Sobanura iki gice intambwe ku yindi")}>Sobanura isomo</button>
+          <button onClick={() => setInput(modelId === "nesa_exam_rev" ? "Nkorera imyitozo ya NESA ishingiye ku bibazo byabanje, ijyanye n'urwego n'isomo ryanjye" : "Mpa urugero hanyuma ungerageze kureba niba nasobanukiwe")}>{modelId === "nesa_exam_rev" ? "Imyitozo ya NESA" : "Nyimenyereze"}</button>
+          <button onClick={() => fileInput.current?.click()}><Paperclip size={15} /> Soma inyandiko</button>
         </div>
       </div> : messages.map((m, i) => <div className={"agentMessage " + m.role} key={i}>
         {m.role === "assistant" && <div className="messageAvatar"><GraduationCap size={15} /></div>}
@@ -160,15 +160,15 @@ function ChatContent() {
       <div className="agentComposer">
         <input ref={fileInput} type="file" hidden multiple accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp" onChange={addFiles} />
         <button className="composerPlus" onClick={() => fileInput.current?.click()} aria-label="Upload file"><Plus size={21} /></button>
-        <textarea rows={1} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={"Message EDUKA " + model.name + "..."} />
-        <button className="composerModel" onClick={() => {}} title="Current AI agent"><BrainCircuit size={14} /><span>{model.name}</span><ChevronDown size={13} /></button>
-        <button className="composerSend" onClick={send} disabled={loading || (!input.trim() && !files.length)} aria-label="Send message">{loading ? <Loader2 size={18} className="spin" /> : <Send size={18} />}</button>
+        <textarea rows={1} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={"Andika ubutumwa bwawe..." } />
+        <button className="composerModel" onClick={() => {}} title="AI ukoresha ubu"><BrainCircuit size={14} /><span>{model.name}</span><ChevronDown size={13} /></button>
+        <button className="composerSend" onClick={send} disabled={loading || (!input.trim() && !files.length)} aria-label="Ohereza ubutumwa">{loading ? <Loader2 size={18} className="spin" /> : <Send size={18} />}</button>
       </div>
-      <p className="agentDisclaimer">EDUKA can make mistakes. Check important information.</p>
+      <p className="agentDisclaimer">EDUKA ishobora kwibeshya. Buri gihe genzura amakuru y'ingenzi.</p>
     </div>
   </main>;
 }
 
 export default function Chat() {
-  return <Suspense fallback={<main className="agentChat"><div className="agentWelcome"><div className="agentWelcomeBadge"><GraduationCap size={24} /></div><h1>Loading EDUKA...</h1></div></main>}><ChatContent /></Suspense>;
+  return <Suspense fallback={<main className="agentChat"><div className="agentWelcome"><div className="agentWelcomeBadge"><GraduationCap size={24} /></div><h1>EDUKA irimo gutangira...</h1></div></main>}><ChatContent /></Suspense>;
 }
