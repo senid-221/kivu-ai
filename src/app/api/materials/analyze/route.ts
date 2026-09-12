@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { readSession } from "@/lib/auth";
-import { downloadUrl } from "@/lib/storage";
 import { extractDocumentText } from "@/lib/document";
+
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 async function uid(req: NextRequest) {
   const token = req.cookies.get("kivu_session")?.value;
@@ -12,52 +14,41 @@ async function uid(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const userId = await uid(req);
+    await uid(req);
     const form = await req.formData();
     const file = form.get("file");
-    if (!(file instanceof File)) return NextResponse.json({ error: "Choose a file first." }, { status: 400 });
-    if (file.size > 15 * 1024 * 1024) return NextResponse.json({ error: "Maximum file size is 15 MB." }, { status: 400 });
 
-    const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const key = "users/" + userId + "/" + Date.now() + "-" + safe;
-
-    const prep = await fetch(new URL("/api/materials", req.url), {
-      method: "POST",
-      headers: { cookie: req.headers.get("cookie") || "", "content-type": "application/json" },
-      body: JSON.stringify({ name: file.name, type: file.type || "application/octet-stream", size: file.size })
-    });
-    const prepared = await prep.json();
-    if (!prep.ok || !prepared.uploadUrl) throw new Error(prepared.error || "Upload preparation failed.");
-
-    const upload = await fetch(prepared.uploadUrl, {
-      method: "PUT",
-      headers: { "content-type": file.type || "application/octet-stream" },
-      body: file
-    });
-    if (!upload.ok) throw new Error("Upload failed.");
-
-    const materialId = prepared.item?.id;
-    let extractedText = "";
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: "Choose a file first." }, { status: 400 });
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      return NextResponse.json({ error: "Maximum file size is 15 MB." }, { status: 400 });
+    }
 
     if (file.type.startsWith("image/")) {
-      extractedText = "[Image uploaded: " + file.name + "]. Analyze the image according to the user's question.";
-    } else {
-      try {
-        extractedText = await extractDocumentText(Buffer.from(await file.arrayBuffer()), file.name, file.type);
-      } catch {
-        extractedText = "";
-      }
+      return NextResponse.json({
+        item: { name: file.name, type: file.type },
+        text: "[Image attached: " + file.name + "]. The image itself is also sent to the AI vision model."
+      });
     }
 
-    if (materialId && extractedText) {
-      await prisma.material.update({ where: { id: materialId }, data: { extractedText: extractedText.slice(0, 120000) } });
-    }
+    const extracted = await extractDocumentText(
+      Buffer.from(await file.arrayBuffer()),
+      file.name,
+      file.type
+    );
 
+    const text = extracted.text.slice(0, 120000);
     return NextResponse.json({
-      item: { id: materialId, name: file.name, type: file.type },
-      text: extractedText.slice(0, 100000)
+      item: { name: file.name, type: file.type },
+      text: text || "[No selectable text was found in this document.]",
+      pages: extracted.pages,
+      truncated: extracted.truncated || false,
+      scanned: !text
     });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Unable to upload this file." }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Unable to analyze this file.";
+    const status = message === "Unauthorized" ? 401 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }
