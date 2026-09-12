@@ -58,7 +58,7 @@ async function listAvailableModels(apiKey: string, force = false) {
   }
 
   const data = await response.json();
-  cachedModels = (Array.isArray(data?.models) ? data.models : [])
+  const models: string[] = (Array.isArray(data?.models) ? data.models : [])
     .filter(
       (model: GeminiModel) =>
         Array.isArray(model.supportedGenerationMethods) &&
@@ -67,8 +67,9 @@ async function listAvailableModels(apiKey: string, force = false) {
     .map((model: GeminiModel) => normalizeModel(String(model.name || "")))
     .filter(Boolean);
 
+  cachedModels = models;
   cacheUntil = Date.now() + 10 * 60 * 1000;
-  return cachedModels;
+  return models;
 }
 
 async function selectModel(apiKey: string, requested?: string, force = false) {
