@@ -34,7 +34,9 @@ export async function requireAdmin(token: string | undefined) {
     throw new Error("Admin access is not configured.");
   }
 
-  const { edukaPrisma } = await import("@/lib/knowledge-rag");
+  const { PrismaClient } = await import("@prisma/client");
+  const edukaPrisma = new PrismaClient();
+  try {
   const user = await edukaPrisma.user.findUnique({
     where: { id: userId },
     select: { email: true },
@@ -45,4 +47,7 @@ export async function requireAdmin(token: string | undefined) {
   }
 
   return userId;
+  } finally {
+    await edukaPrisma.$disconnect();
+  }
 }
