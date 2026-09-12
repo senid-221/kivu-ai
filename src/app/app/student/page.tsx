@@ -14,25 +14,22 @@ export default function Student() {
   const [mode, setMode] = useState(modes[0]);
   const [topic, setTopic] = useState("");
 
-  return (
-    <main className="app">
-      <header>
-        <div>
-          <b>✦ KIVU AI</b>
-          <small>Student workspace</small>
-        </div>
-      </header>
+  const prompt = topic.trim()
+    ? `${mode}: ${topic.trim()}`
+    : mode;
 
-      <section className="welcome">
-        <span>KIVU STUDENT</span>
+  return (
+    <main className="studentPage">
+      <section className="studentIntro">
+        <span className="studentEyebrow">KIVU STUDENT</span>
         <h1>Study in a way that helps you understand.</h1>
-        <p>Learn actively, revise with confidence and practice at your own pace.</p>
+        <p>Learn, revise and practice at your own pace.</p>
       </section>
 
-      <div className="studyModes">
+      <nav className="studentModes" aria-label="Choose study mode">
         {modes.map((item) => (
           <button
-            className={mode === item ? "selected" : ""}
+            className={mode === item ? "studentMode active" : "studentMode"}
             onClick={() => setMode(item)}
             key={item}
             type="button"
@@ -40,21 +37,26 @@ export default function Student() {
             {item}
           </button>
         ))}
-      </div>
+      </nav>
 
-      <section className="studyBox">
+      <section className="studentStudy">
         <h2>{mode}</h2>
-        <input
-          value={topic}
-          onChange={(event) => setTopic(event.target.value)}
-          placeholder="What are you studying?"
-        />
-        <Link
-          className="button"
-          href={"/app/chat?model=student&prompt=" + encodeURIComponent(mode + ": " + topic)}
-        >
-          Start studying →
-        </Link>
+        <p className="studentHelp">Tell KIVU AI what you want to study.</p>
+
+        <div className="studentInputRow">
+          <input
+            value={topic}
+            onChange={(event) => setTopic(event.target.value)}
+            placeholder="What are you studying?"
+            aria-label="What are you studying?"
+          />
+          <Link
+            className="studentStart"
+            href={"/app/chat?model=student&prompt=" + encodeURIComponent(prompt)}
+          >
+            Start →
+          </Link>
+        </div>
       </section>
     </main>
   );
