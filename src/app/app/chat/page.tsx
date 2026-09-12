@@ -2,7 +2,7 @@
 
 import { ChangeEvent, Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, FileText, Image as ImageIcon, Loader2, Paperclip, Plus, Send, Sparkles, X } from "lucide-react";
+import { BrainCircuit, ChevronDown, FileText, GraduationCap, Image as ImageIcon, Loader2, Paperclip, Plus, Send, X } from "lucide-react";
 
 const models: Record<string, { name: string; subtitle: string; greeting: string }> = {
   teacher: { name: "Teacher", subtitle: "Clear explanations and practical guidance", greeting: "How can I help you learn today?" },
@@ -15,7 +15,7 @@ const models: Record<string, { name: string; subtitle: string; greeting: string 
 function ThinkingIndicator() {
   return (
     <div className="thinkingIndicator" role="status" aria-live="polite">
-      <span className="thinkingIcon"><Sparkles size={18} /></span>
+      <span className="thinkingIcon"><BrainCircuit size={18} /></span>
       <span>Thinking</span>
       <span className="thinkingDots" aria-hidden="true"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span>
     </div>
@@ -117,15 +117,15 @@ function ChatContent() {
 
   return <main className="agentChat">
     <header className="agentHeader">
-      <div className="agentBrand"><span className="agentBrandMark"><Sparkles size={18} /></span><div><b>EDUKA</b><small>AI Agent workspace</small></div></div>
+      <div className="agentBrand"><span className="agentBrandMark"><BrainCircuit size={18} /></span><div><b>EDUKA</b><small>AI Agent workspace</small></div></div>
       <div className="agentHeaderTools">
-        <div className="agentModelWrap"><Sparkles size={14} /><select value={modelId} onChange={e => changeModel(e.target.value)} aria-label="Choose AI model">{Object.entries(models).map(([id, m]) => <option value={id} key={id}>{m.name}</option>)}</select><ChevronDown size={14} /></div>
+        <div className="agentModelWrap"><BrainCircuit size={14} /><select value={modelId} onChange={e => changeModel(e.target.value)} aria-label="Choose AI model">{Object.entries(models).map(([id, m]) => <option value={id} key={id}>{m.name}</option>)}</select><ChevronDown size={14} /></div>
       </div>
     </header>
 
     <section className="agentMessages">
       {!messages.length ? <div className="agentWelcome">
-        <div className="agentWelcomeBadge"><Sparkles size={24} /></div>
+        <div className="agentWelcomeBadge"><GraduationCap size={24} /></div>
         <p className="agentEyebrow">EDUKA AGENT</p>
         <h1>{model.greeting}</h1>
         <p>Ask a question, upload a PDF, document, exam paper or image, and let EDUKA analyze it with you.</p>
@@ -135,7 +135,7 @@ function ChatContent() {
           <button onClick={() => fileInput.current?.click()}><Paperclip size={15} /> Analyze a file</button>
         </div>
       </div> : messages.map((m, i) => <div className={"agentMessage " + m.role} key={i}>
-        {m.role === "assistant" && <div className="messageAvatar"><Sparkles size={15} /></div>}
+        {m.role === "assistant" && <div className="messageAvatar"><GraduationCap size={15} /></div>}
         <div className="messageBubble">{m.role === "assistant" ? cleanDisplayedAiText(m.content) : m.content}</div>
       </div>)}
       {loading && <ThinkingIndicator />}
@@ -149,7 +149,7 @@ function ChatContent() {
         <input ref={fileInput} type="file" hidden multiple accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp" onChange={addFiles} />
         <button className="composerPlus" onClick={() => fileInput.current?.click()} aria-label="Upload file"><Plus size={21} /></button>
         <textarea rows={1} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={"Message EDUKA " + model.name + "..."} />
-        <button className="composerModel" onClick={() => {}} title="Current AI agent"><Sparkles size={14} /><span>{model.name}</span><ChevronDown size={13} /></button>
+        <button className="composerModel" onClick={() => {}} title="Current AI agent"><BrainCircuit size={14} /><span>{model.name}</span><ChevronDown size={13} /></button>
         <button className="composerSend" onClick={send} disabled={loading || (!input.trim() && !files.length)} aria-label="Send message">{loading ? <Loader2 size={18} className="spin" /> : <Send size={18} />}</button>
       </div>
       <p className="agentDisclaimer">EDUKA can make mistakes. Check important information.</p>
@@ -158,5 +158,5 @@ function ChatContent() {
 }
 
 export default function Chat() {
-  return <Suspense fallback={<main className="agentChat"><div className="agentWelcome"><div className="agentWelcomeBadge"><Sparkles size={24} /></div><h1>Loading EDUKA...</h1></div></main>}><ChatContent /></Suspense>;
+  return <Suspense fallback={<main className="agentChat"><div className="agentWelcome"><div className="agentWelcomeBadge"><GraduationCap size={24} /></div><h1>Loading EDUKA...</h1></div></main>}><ChatContent /></Suspense>;
 }
