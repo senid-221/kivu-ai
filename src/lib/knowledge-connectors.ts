@@ -21,23 +21,39 @@ const PROVIDERS: Record<KnowledgeMode, Provider[]> = {
       "https://elearning.reb.rw/local/reblibrary/index.php?search=" + encodeURIComponent(q),
       "https://elearning.reb.rw/course/search.php?search=" + encodeURIComponent(q)
     ], match: /pluginfile\.php|resource|course\/view|reblibrary|mod\/folder|mod\/resource/i },
-    { name: "OpenStax", hosts: ["openstax.org"], searchUrls: () => ["https://openstax.org/subjects"], match: /openstax\.org\//i }
+    { name: "OpenStax", hosts: ["openstax.org"], searchUrls: () => ["https://openstax.org/subjects"], match: /openstax\.org\//i },
+    { name: "MIT OpenCourseWare", hosts: ["ocw.mit.edu"], searchUrls: q => ["https://ocw.mit.edu/search/?q=" + encodeURIComponent(q)], match: /courses\//i },
+    { name: "Open Textbook Library", hosts: ["open.umn.edu"], searchUrls: q => ["https://open.umn.edu/opentextbooks/Search?search=" + encodeURIComponent(q)], match: /opentextbooks\//i },
+    { name: "Wikibooks", hosts: ["en.wikibooks.org"], searchUrls: q => ["https://en.wikibooks.org/w/index.php?search=" + encodeURIComponent(q)], match: /wiki\//i },
+    { name: "Wikiversity", hosts: ["en.wikiversity.org"], searchUrls: q => ["https://en.wikiversity.org/w/index.php?search=" + encodeURIComponent(q)], match: /wiki\//i }
   ],
   student: [
     { name: "REB E-Learning", hosts: ["elearning.reb.rw"], searchUrls: q => ["https://elearning.reb.rw/local/reblibrary/index.php?search=" + encodeURIComponent(q)], match: /pluginfile\.php|resource|course\/view|reblibrary|mod\/resource/i },
-    { name: "OpenStax", hosts: ["openstax.org"], searchUrls: () => ["https://openstax.org/subjects"], match: /openstax\.org\//i }
+    { name: "OpenStax", hosts: ["openstax.org"], searchUrls: () => ["https://openstax.org/subjects"], match: /openstax\.org\//i },
+    { name: "MIT OpenCourseWare", hosts: ["ocw.mit.edu"], searchUrls: q => ["https://ocw.mit.edu/search/?q=" + encodeURIComponent(q)], match: /courses\//i },
+    { name: "Open Textbook Library", hosts: ["open.umn.edu"], searchUrls: q => ["https://open.umn.edu/opentextbooks/Search?search=" + encodeURIComponent(q)], match: /opentextbooks\//i },
+    { name: "Wikibooks", hosts: ["en.wikibooks.org"], searchUrls: q => ["https://en.wikibooks.org/w/index.php?search=" + encodeURIComponent(q)], match: /wiki\//i },
+    { name: "Wikiversity", hosts: ["en.wikiversity.org"], searchUrls: q => ["https://en.wikiversity.org/w/index.php?search=" + encodeURIComponent(q)], match: /wiki\//i },
+    { name: "Wikipedia", hosts: ["en.wikipedia.org"], searchUrls: q => ["https://en.wikipedia.org/w/index.php?search=" + encodeURIComponent(q)], match: /wiki\//i }
   ],
   nesa_exam_rev: [
-    { name: "NESA Official Resources", hosts: ["nesa.gov.rw", "www.nesa.gov.rw"], searchUrls: q => ["https://www.nesa.gov.rw/1/resources"], match: /resources|national-exam|model-questions|fileadmin|uploads|pdf/i },
-    { name: "REB E-Learning", hosts: ["elearning.reb.rw"], searchUrls: q => ["https://elearning.reb.rw/local/reblibrary/index.php?search=" + encodeURIComponent(q)], match: /pluginfile\.php|resource|course\/view|reblibrary|mod\/resource/i }
+    { name: "NESA Official Resources", hosts: ["nesa.gov.rw", "www.nesa.gov.rw"], searchUrls: () => ["https://www.nesa.gov.rw/1/resources"], match: /resources|national-exam|model-questions|fileadmin|uploads|pdf/i },
+    { name: "REB E-Learning", hosts: ["elearning.reb.rw"], searchUrls: q => ["https://elearning.reb.rw/local/reblibrary/index.php?search=" + encodeURIComponent(q)], match: /pluginfile\.php|resource|course\/view|reblibrary|mod\/resource/i },
+    { name: "OpenStax", hosts: ["openstax.org"], searchUrls: () => ["https://openstax.org/subjects"], match: /openstax\.org\//i }
   ],
   developer: [
     { name: "MDN Web Docs", hosts: ["developer.mozilla.org"], searchUrls: q => ["https://developer.mozilla.org/en-US/search?q=" + encodeURIComponent(q)], match: /\/docs\//i },
-    { name: "PostgreSQL Documentation", hosts: ["postgresql.org"], searchUrls: () => ["https://www.postgresql.org/docs/"], match: /\/docs\//i },
+    { name: "Python Documentation", hosts: ["docs.python.org"], searchUrls: q => ["https://docs.python.org/3/search.html?q=" + encodeURIComponent(q)], match: /\/3\//i },
     { name: "React Documentation", hosts: ["react.dev"], searchUrls: () => ["https://react.dev/learn"], match: /react\.dev\//i },
-    { name: "Next.js Documentation", hosts: ["nextjs.org"], searchUrls: () => ["https://nextjs.org/docs"], match: /nextjs\.org\/docs/i }
+    { name: "Node.js Documentation", hosts: ["nodejs.org"], searchUrls: q => ["https://nodejs.org/en/search/?q=" + encodeURIComponent(q)], match: /en\/docs|api/i },
+    { name: "PostgreSQL Documentation", hosts: ["postgresql.org"], searchUrls: () => ["https://www.postgresql.org/docs/"], match: /\/docs\//i },
+    { name: "Next.js Documentation", hosts: ["nextjs.org"], searchUrls: () => ["https://nextjs.org/docs"], match: /nextjs\.org\/docs/i },
+    { name: "GitHub Open Source", hosts: ["github.com"], searchUrls: q => ["https://github.com/search?q=" + encodeURIComponent(q) + "&type=repositories"], match: /github\.com\/[^/]+\/[^/]+/i }
   ],
   seller: [
+    { name: "Wikipedia", hosts: ["en.wikipedia.org"], searchUrls: q => ["https://en.wikipedia.org/w/index.php?search=" + encodeURIComponent(q)], match: /wiki\//i },
+    { name: "Wikibooks", hosts: ["en.wikibooks.org"], searchUrls: q => ["https://en.wikibooks.org/w/index.php?search=" + encodeURIComponent(q)], match: /wiki\//i },
+    { name: "MIT OpenCourseWare", hosts: ["ocw.mit.edu"], searchUrls: q => ["https://ocw.mit.edu/search/?q=" + encodeURIComponent(q)], match: /courses\//i },
     { name: "HubSpot Academy", hosts: ["academy.hubspot.com"], searchUrls: q => ["https://academy.hubspot.com/courses?search=" + encodeURIComponent(q)], match: /academy\.hubspot\.com\//i },
     { name: "HubSpot Sales Training", hosts: ["hubspot.com"], searchUrls: () => ["https://www.hubspot.com/sales/sales-training"], match: /hubspot\.com\/sales/i }
   ]
