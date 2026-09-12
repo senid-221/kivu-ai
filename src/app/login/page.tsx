@@ -33,9 +33,9 @@ export default function Login() {
   return (
     <main className="authPage">
       <form onSubmit={submit} className="authCard">
-        <Link href="/" className="brand">✦ KIVU AI</Link>
+        <Link href="/" className="brand">✦ EDUKA</Link>
         <h1>Welcome back</h1>
-        <p>Continue your KIVU journey.</p>
+        <p>Continue your Eduka journey.</p>
 
         <input
           type="email"
@@ -58,7 +58,7 @@ export default function Login() {
         <button className="button" type="submit">Sign in</button>
 
         <p>
-          New to KIVU? <Link href="/signup">Create an account</Link>
+          New to Eduka? <Link href="/signup">Create an account</Link>
         </p>
       </form>
     </main>
