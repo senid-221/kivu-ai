@@ -114,7 +114,7 @@ function extractText(data: any) {
 }
 
 /**
- * KIVU AI displays clean plain text. Gemini may return Markdown such as
+ * Eduka displays clean plain text. Gemini may return Markdown such as
  * **bold**, *italic*, headings and asterisk bullets; remove those markers
  * before the response reaches the UI.
  */
