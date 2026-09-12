@@ -1,1 +1,42 @@
-import mammoth from "mammoth";import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";export async function extractDocumentText(buffer:Buffer,name:string,type:string){const n=name.toLowerCase();if(type.startsWith("text/")||n.endsWith(".txt"))return buffer.toString("utf8");if(n.endsWith(".docx"))return (await mammoth.extractRawText({buffer})).value;if(n.endsWith(".pdf")||type==="application/pdf"){const doc=await pdfjsLib.getDocument({data:new Uint8Array(buffer)}).promise;let out="";for(let i=1;i<=doc.numPages;i++){const c=await (await doc.getPage(i)).getTextContent();out+=c.items.map((x:any)=>x.str||"").join(" ")+"\n"}return out}throw Error("Unsupported format")}
+import mammoth from "mammoth";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+
+type PdfTextItem = { str?: string };
+
+export async function extractDocumentText(
+  buffer: Buffer,
+  name: string,
+  type: string,
+): Promise<string> {
+  const normalizedName = name.toLowerCase();
+
+  if (type.startsWith("text/") || normalizedName.endsWith(".txt")) {
+    return buffer.toString("utf8");
+  }
+
+  if (normalizedName.endsWith(".docx")) {
+    return (await mammoth.extractRawText({ buffer })).value;
+  }
+
+  if (normalizedName.endsWith(".pdf") || type === "application/pdf") {
+    const document = await pdfjsLib.getDocument({
+      data: new Uint8Array(buffer),
+      useSystemFonts: true,
+    }).promise;
+
+    let text = "";
+
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+      const page = await document.getPage(pageNumber);
+      const content = await page.getTextContent();
+      const items = content.items as PdfTextItem[];
+      text += items.map((item) => item.str ?? "").join(" ") + "\n";
+      page.cleanup();
+    }
+
+    await document.cleanup();
+    return text;
+  }
+
+  throw new Error("Unsupported format");
+}
