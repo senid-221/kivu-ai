@@ -1,1 +1,93 @@
-import { NextRequest, NextResponse } from "next/server"; import { prisma } from "../../../lib/db"; import { readSession } from "../../../lib/auth"; async function uid(req:NextRequest){const t=req.cookies.get("kivu_session")?.value;if(!t)throw Error("Unauthorized");return readSession(t)} export async function POST(req:NextRequest){try{const userId=await uid(req);const {subject,question,options}=await req.json();if(!question?.trim())return NextResponse.json({error:"Enter an exam question."},{status:400});const k=process.env.GEMINI_API_KEY;if(!k)throw Error("GEMINI_API_KEY is missing");const m=process.env.GEMINI_MODEL||"gemini-2.5-flash";const p="You are KIVU AI NESA EXAM REV. Return ONLY valid JSON with correctAnswer, explanation, keyConcept, revisionTip. Subject: "+(subject||"General")+". Question: "+question+". Options: "+(options||"");const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent?key="+encodeURIComponent(k),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:p}]}]})});const d:any=await r.json();if(!r.ok)throw Error(d?.error?.message||"Gemini error");const raw=d?.candidates?.[0]?.content?.parts?.map((x:any)=>x.text||"").join("\n")||"";const clean=raw.replace(/^\s*\`\`\`json\s*/i,"").replace(/\`\`\`\s*$/,"");let x:any;try{x=JSON.parse(clean)}catch{x={correctAnswer:"See explanation",explanation:raw,keyConcept:"Review the main concept.",revisionTip:"Practice similar questions."}}const review=await prisma.examReview.create({data:{subject:subject||null,question,options:options||null,correctAnswer:x.correctAnswer||null,explanation:x.explanation||null,keyConcept:x.keyConcept||null,revisionTip:x.revisionTip||null,userId}});return NextResponse.json({id:review.id,...x})}catch(e){return NextResponse.json({error:e instanceof Error?e.message:"Unable to review this exam question."},{status:500})}} export async function GET(req:NextRequest){try{const userId=await uid(req);return NextResponse.json(await prisma.examReview.findMany({where:{userId},orderBy:{createdAt:"desc"},take:20}))}catch{return NextResponse.json([])}}
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { readSession } from "@/lib/auth";
+import { generateGemini } from "@/lib/gemini";
+
+async function uid(req: NextRequest) {
+  const token = req.cookies.get("kivu_session")?.value;
+  if (!token) throw new Error("Unauthorized");
+  return readSession(token);
+}
+
+function parseReview(raw: string) {
+  const clean = raw
+    .replace(/^\s*\`\`\`json\s*/i, "")
+    .replace(/\`\`\`\s*$/, "");
+
+  try {
+    return JSON.parse(clean);
+  } catch {
+    return {
+      correctAnswer: "See explanation",
+      explanation: raw,
+      keyConcept: "Review the main concept.",
+      revisionTip: "Practice similar questions.",
+    };
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const userId = await uid(req);
+    const { subject, question, options } = await req.json();
+
+    if (!question?.trim()) {
+      return NextResponse.json({ error: "Enter an exam question." }, { status: 400 });
+    }
+
+    const result = await generateGemini({
+      systemInstruction:
+        "You are KIVU AI NESA EXAM REV. Return ONLY valid JSON with correctAnswer, explanation, keyConcept and revisionTip. Be accurate and educational.",
+      parts: [
+        {
+          text:
+            "Subject: " +
+            (subject || "General") +
+            "\nQuestion: " +
+            question +
+            "\nOptions: " +
+            (options || ""),
+        },
+      ],
+      temperature: 0.2,
+      maxOutputTokens: 1800,
+    });
+
+    const reviewData = parseReview(result.text);
+    const review = await prisma.examReview.create({
+      data: {
+        subject: subject || null,
+        question,
+        options: options || null,
+        correctAnswer: reviewData.correctAnswer || null,
+        explanation: reviewData.explanation || null,
+        keyConcept: reviewData.keyConcept || null,
+        revisionTip: reviewData.revisionTip || null,
+        userId,
+      },
+    });
+
+    return NextResponse.json({ id: review.id, ...reviewData, model: result.model });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unable to review this exam question.";
+    return NextResponse.json(
+      { error: message },
+      { status: message === "Unauthorized" ? 401 : 500 }
+    );
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const userId = await uid(req);
+    const reviews = await prisma.examReview.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    });
+    return NextResponse.json(reviews);
+  } catch {
+    return NextResponse.json([]);
+  }
+}
